@@ -1,11 +1,12 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checklist Veículos Leves — Corrigido</title>
+  <title>Checklist Veículos Leves</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body{font-family:Arial,Helvetica,sans-serif;background:#f2f4f7;margin:0;padding:12px}
     .paper{max-width:820px;margin:0 auto;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 12px rgba(0,0,0,0.06)}
@@ -24,6 +25,7 @@
     .obs{margin-top:8px}
     .obs input{width:100%}
     .btn{display:inline-block;background:#0b73d6;color:#fff;border:none;padding:12px 14px;border-radius:8px;font-size:15px;cursor:pointer}
+    .btn-gray{background:#6c757d}
     .msg{color:green;margin-top:10px;display:none}
     @media(max-width:420px){.row{flex-direction:column}}
   </style>
@@ -33,8 +35,8 @@
     <h1>Check-List Diário — Veículos Leves</h1>
 
     <div class="row">
-      <div class="col"><label for="matricula">Nº de cadastro do funcionário</label><input id="matricula" type="text" placeholder="Número de cadastro"></div>
-      <div class="col"><label for="veiculo">Veículo</label><input id="veiculo" type="text" placeholder="Ex: Hilux"></div>
+      <div class="col"><label for="matricula">Nome ou nº cadastro do funcionário</label><input id="matricula" type="text" placeholder="Número de cadastro"></div>
+      <div class="col"><label for="veiculo">Veículo</label><input id="veiculo" type="text" placeholder="Ex: ABC 1C34"></div>
       <div class="col"><label for="data">Data</label><input id="data" type="date"></div>
       <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
     </div>
@@ -43,11 +45,12 @@
 
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="btnGerar">Gerar e Salvar PDF</button>
-      <button class="btn" id="btnInstrucoes" style="background:#6c757d">Como enviar pelo WhatsApp</button>
+      <button class="btn btn-gray" id="btnExcel">Gerar Excel</button>
+      <button class="btn btn-gray" id="btnInstrucoes">Como enviar pelo WhatsApp</button>
     </div>
 
-    <div class="msg" id="msgOk">✅ PDF gerado e salvo em Downloads. Abra o WhatsApp e anexe o arquivo manualmente.</div>
-    <div style="margin-top:10px;font-size:13px;color:#666">O PDF será gerado no formato A4 e salvo com nome <strong>checklist_YYYY-MM-DD.pdf</strong>.</div>
+    <div class="msg" id="msgOk">✅ Arquivo gerado com sucesso! Verifique sua pasta de downloads.</div>
+    <div style="margin-top:10px;font-size:13px;color:#666">Os arquivos serão gerados com nome <strong>checklist_NOMECADASTRO_YYYY-MM-DD</strong>.</div>
   </div>
 
   <script>
@@ -57,9 +60,10 @@
     function pad(n){return String(n).padStart(2,'0')}
     dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
 
-    // Gerar itens dinamicamente (mantendo o conteúdo original)
     const itens = [
-      'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio','Luzes e parte elétrica em geral','Buzina','Freios em geral','Bandeirola','Triângulo / macaco / chave roda','Retrovisor / janelas / para-brisa e vidros em geral','Cinto de segurança','Sinalizações','Giroflex','Documentação do Veículo'
+      'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio',
+      'Luzes e parte elétrica em geral','Buzina','Freios em geral','Bandeirola','Triângulo / macaco / chave roda',
+      'Retrovisor / janelas / para-brisa e vidros em geral','Cinto de segurança','Sinalizações','Giroflex','Documentação do Veículo'
     ];
 
     const descs = [
@@ -101,29 +105,32 @@
 
     function coletarDados(){
       const itemsEls = Array.from(document.querySelectorAll('#items .item'));
-      const items = itemsEls.map(it => {
-        const num = it.getAttribute('data-num') || '';
-        const title = (it.querySelector('.item-title') || {textContent:''}).textContent.trim();
-        const desc = (it.querySelector('.param-desc') || {value:''}).value.trim();
-        const radios = it.querySelectorAll('input[type=radio]');
-        let selected = null;
-        radios.forEach(r=>{ if(r.checked) selected = r.value; });
-        const obs = (it.querySelector('.obs_input') || {value:''}).value.trim();
-        return { num, title, desc, status: selected, obs };
-      });
-      return {
+      return itemsEls.map(it => ({
+        num: it.getAttribute('data-num'),
+        title: it.querySelector('.item-title').textContent.trim(),
+        desc: it.querySelector('.param-desc').value.trim(),
+        status: Array.from(it.querySelectorAll('input[type=radio]')).find(r=>r.checked)?.value || '',
+        obs: it.querySelector('.obs_input').value.trim()
+      }));
+    }
+
+    function limparNomeArquivo(nome){
+      return nome.replace(/[^a-z0-9_-]/gi, '_'); // substitui caracteres inválidos por "_"
+    }
+
+    async function gerarPDFsalvar(){
+      const dados = {
         data: dataEl.value,
         matricula: document.getElementById('matricula').value.trim(),
         veiculo: document.getElementById('veiculo').value.trim(),
         hodometro: document.getElementById('hodometro').value.trim(),
-        items
+        items: coletarDados()
       };
-    }
 
-    function escapeHtml(t){ if(!t) return ''; return String(t).replace(/[&<>"]|'/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
+      const nomeFuncionario = limparNomeArquivo(dados.matricula || 'sem_nome');
+      const dataArquivo = new Date().toISOString().slice(0,10);
+      const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.pdf`;
 
-    async function gerarPDFsalvar(){
-      const data = coletarDados();
       const report = document.createElement('div');
       report.style.width = '794px';
       report.style.padding = '24px';
@@ -131,88 +138,89 @@
       report.style.background = '#fff';
       report.style.color = '#111';
       report.style.boxSizing = 'border-box';
+      report.innerHTML = `
+        <h2>Check-List Diário — Veículos Leves</h2>
+        <div><strong>Data:</strong> ${dados.data || '-'}<br>
+        <strong>Nº cadastro:</strong> ${dados.matricula || '-'}<br>
+        <strong>Veículo:</strong> ${dados.veiculo || '-'}<br>
+        <strong>Hodômetro:</strong> ${dados.hodometro || '-'}</div>
+        <hr style="margin:10px 0;">`;
 
-      const header = document.createElement('div');
-      header.style.display = 'flex';
-      header.style.justifyContent = 'space-between';
-      header.style.marginBottom = '12px';
-      header.innerHTML = `<strong>Check-List Diário — Veículos Leves</strong><div style="text-align:right;font-size:12px;color:#444">Data: <strong>${escapeHtml(data.data||'-')}</strong><br>Nº cadastro: <strong>${escapeHtml(data.matricula||'-')}</strong></div>`;
-      report.appendChild(header);
-
-      const meta = document.createElement('div');
-      meta.style.marginBottom = '12px';
-      meta.innerHTML = `<div><strong>Veículo:</strong> ${escapeHtml(data.veiculo||'-')}</div><div><strong>Hodômetro:</strong> ${escapeHtml(data.hodometro||'-')}</div>`;
-      report.appendChild(meta);
-
-      const itemsTitle = document.createElement('div');
-      itemsTitle.innerHTML = '<strong>Itens Verificados</strong>';
-      report.appendChild(itemsTitle);
-
-      data.items.forEach(it=>{
-        const block = document.createElement('div');
-        block.style.marginBottom = '10px';
-        block.style.fontSize = '13px';
-        block.innerHTML = `<div style="font-weight:600">${it.num}. ${it.title}</div><div style="margin-top:6px;margin-left:6px;white-space:pre-wrap">${it.desc}</div><div style="margin-top:6px;margin-left:6px"><strong>Status:</strong> ${(it.status=='conforme'?'Conforme':it.status=='medio'?'Médio':it.status=='fora'?'Fora':'Não marcado')}</div><div style="margin-left:6px;margin-top:6px"><strong>Observação:</strong> ${escapeHtml(it.obs||'-')}</div>`;
-        report.appendChild(block);
+      dados.items.forEach(it=>{
+        report.innerHTML += `<div style="font-size:13px;margin-bottom:10px;">
+          <strong>${it.num}. ${it.title}</strong><br>
+          <div style="margin-left:8px;white-space:pre-wrap;">${it.desc}</div>
+          <div style="margin-left:8px;margin-top:4px;"><strong>Status:</strong> ${it.status || 'Não marcado'}</div>
+          <div style="margin-left:8px;margin-top:4px;"><strong>Observação:</strong> ${it.obs || '-'}</div>
+        </div>`;
       });
 
-      const footer = document.createElement('div');
-      footer.style.marginTop = '18px';
-      footer.style.fontSize = '11px';
-      footer.style.color = '#666';
-      footer.textContent = 'Gerado por checklist local — reveja antes de enviar por WhatsApp.';
-      report.appendChild(footer);
-
-      report.style.position = 'fixed';
-      report.style.left = '-9999px';
       document.body.appendChild(report);
 
-      try {
-        const canvas = await html2canvas(report, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+      const canvas = await html2canvas(report, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
 
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-        let heightLeft = imgHeight;
-        let position = 0;
+      let heightLeft = imgHeight;
+      let position = 0;
+      const overlap = 15;
 
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      heightLeft -= (pdfHeight - overlap);
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + overlap;
+        pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-          heightLeft -= pdfHeight;
-        }
-
-        const nomeArquivo = 'checklist_' + new Date().toISOString().slice(0, 10) + '.pdf';
-        pdf.save(nomeArquivo);
-
-        document.getElementById('msgOk').style.display = 'block';
-        setTimeout(()=> document.getElementById('msgOk').style.display = 'none', 6000);
-      } finally {
-        document.body.removeChild(report);
+        heightLeft -= (pdfHeight - overlap);
       }
+
+      pdf.save(nomeArquivo);
+      document.body.removeChild(report);
+      msgOK();
     }
 
-    document.getElementById('btnGerar').addEventListener('click', async function(){
-      this.disabled = true;
-      const originalText = this.textContent;
-      this.textContent = 'Gerando PDF...';
-      try { await gerarPDFsalvar(); }
-      catch(e){ alert('Erro ao gerar PDF: ' + e.message); }
-      finally { this.disabled = false; this.textContent = originalText; }
-    });
+    function gerarExcel(){
+      const dados = coletarDados();
+      const matricula = document.getElementById('matricula').value.trim();
+      const nomeFuncionario = limparNomeArquivo(matricula || 'sem_nome');
+      const dataArquivo = new Date().toISOString().slice(0,10);
+      const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
 
-    document.getElementById('btnInstrucoes').addEventListener('click', ()=>{
-      alert('Após gerar o PDF, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads.');
-    });
+      const linhas = dados.map(it => ({
+        Data: dataEl.value,
+        Matricula: matricula,
+        Veiculo: document.getElementById('veiculo').value.trim(),
+        Hodometro: document.getElementById('hodometro').value.trim(),
+        Numero: it.num,
+        Item: it.title,
+        Descricao: it.desc,
+        Status: it.status,
+        Observacao: it.obs
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(linhas);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
+      XLSX.writeFile(wb, nomeArquivo);
+      msgOK();
+    }
+
+    function msgOK(){
+      const m = document.getElementById('msgOk');
+      m.style.display = 'block';
+      setTimeout(()=>m.style.display='none',6000);
+    }
+
+    document.getElementById('btnGerar').onclick = gerarPDFsalvar;
+    document.getElementById('btnExcel').onclick = gerarExcel;
+    document.getElementById('btnInstrucoes').onclick = ()=>alert('Após gerar o PDF ou Excel, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads.');
   })();
   </script>
 </body>
