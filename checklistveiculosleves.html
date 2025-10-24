@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checklist Veículos Leves — Corrigido</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f2f4f7;margin:0;padding:12px}
+    .paper{max-width:820px;margin:0 auto;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 12px rgba(0,0,0,0.06)}
+    h1{font-size:18px;margin:0 0 8px}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .col{flex:1;min-width:120px;display:flex;flex-direction:column;margin-bottom:8px}
+    label{font-size:13px;margin-bottom:6px;color:#222}
+    input[type=text], input[type=date], textarea {padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff}
+    textarea.param-desc{min-height:48px;resize:vertical}
+    .items{margin-top:12px}
+    .item{border:1px solid #eee;padding:10px;border-radius:6px;margin-bottom:8px;background:#fafafa}
+    .item-title{font-weight:600}
+    .param-desc-label{font-size:12px;color:#444;margin-top:6px;margin-bottom:4px}
+    .choices{display:flex;gap:12px;align-items:center;margin-top:8px}
+    .choice{display:flex;align-items:center;gap:6px}
+    .obs{margin-top:8px}
+    .obs input{width:100%}
+    .btn{display:inline-block;background:#0b73d6;color:#fff;border:none;padding:12px 14px;border-radius:8px;font-size:15px;cursor:pointer}
+    .msg{color:green;margin-top:10px;display:none}
+    @media(max-width:420px){.row{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="paper" id="paper">
+    <h1>Check-List Diário — Veículos Leves</h1>
+
+    <div class="row">
+      <div class="col"><label for="matricula">Nº de cadastro do funcionário</label><input id="matricula" type="text" placeholder="Número de cadastro"></div>
+      <div class="col"><label for="veiculo">Veículo</label><input id="veiculo" type="text" placeholder="Ex: Hilux"></div>
+      <div class="col"><label for="data">Data</label><input id="data" type="date"></div>
+      <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
+    </div>
+
+    <div class="items" id="items"></div>
+
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="btnGerar">Gerar e Salvar PDF</button>
+      <button class="btn" id="btnInstrucoes" style="background:#6c757d">Como enviar pelo WhatsApp</button>
+    </div>
+
+    <div class="msg" id="msgOk">✅ PDF gerado e salvo em Downloads. Abra o WhatsApp e anexe o arquivo manualmente.</div>
+    <div style="margin-top:10px;font-size:13px;color:#666">O PDF será gerado no formato A4 e salvo com nome <strong>checklist_YYYY-MM-DD.pdf</strong>.</div>
+  </div>
+
+  <script>
+  (function(){
+    const dataEl = document.getElementById('data');
+    const today = new Date();
+    function pad(n){return String(n).padStart(2,'0')}
+    dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+
+    // Gerar itens dinamicamente (mantendo o conteúdo original)
+    const itens = [
+      'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio','Luzes e parte elétrica em geral','Buzina','Freios em geral','Bandeirola','Triângulo / macaco / chave roda','Retrovisor / janelas / para-brisa e vidros em geral','Cinto de segurança','Sinalizações','Giroflex','Documentação do Veículo'
+    ];
+
+    const descs = [
+      'Sem vazamentos, sem peças ou partes soltas, bancos em condições de assentar, portas fechando, direção alinhada, etc.',
+      'Calibrados, sem lesões, rasgos e trincas, aparência normal, bom estado conservação, step preso ao suporte. Rodas com todos os parafusos',
+      'Sempre completo de acordo com o nível indicado.',
+      'Acusando o nível normal na vareta, sendo trocado na data correta, de acordo com o manual de orientação e manutenção do veículo.',
+      'Sem vazamentos/ possuir combustível suficiente.',
+      'Fixo no suporte, lacrado e carregado (manômetro indicando a faixa verde), dentro do prazo de validade. CLASSE ABC',
+      'Funcionamento perfeito dos faróis e sinalizador de setas, alarme sonoro de ré, limpador de para-brisa, luz freio, faroletes, outros, etc...',
+      'Deve estar funcionando.',
+      'Freando com eficiência. Freio de estacionamento regulado e funcionando em perfeito estado.',
+      'Deve possuir para acesso na área da mina e britagem.',
+      'Funcionando, testados e em perfeito estado, junto ao veículo.',
+      'Regulado, sem trincas e em perfeito estado de funcionamento',
+      'Funcionando e em perfeito estado para todos ocupantes',
+      'Faixas refletivas conforme padrão. Placas legíveis',
+      'Para acesso na área da mina e britagem durante a noite, deve estar funcionando.',
+      'Ipva, seguro, emplacamento, credenciamento interno dentro da validade.'
+    ];
+
+    const itemsContainer = document.getElementById('items');
+    itens.forEach((t,i)=>{
+      const n = i+1;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.setAttribute('data-num',n);
+      div.innerHTML = `<div class="item-title">${n}. ${t}</div>
+        <div class="param-desc-label">Descrição do parâmetro</div>
+        <textarea class="param-desc">${descs[i]}</textarea>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="choice_${n}" value="conforme"> Conforme</label>
+          <label class="choice"><input type="radio" name="choice_${n}" value="medio"> Médio</label>
+          <label class="choice"><input type="radio" name="choice_${n}" value="fora"> Fora</label>
+        </div>
+        <div class="obs"><label>Observação</label><input type="text" class="obs_input" placeholder="Comentário (opcional)"></div>`;
+      itemsContainer.appendChild(div);
+    });
+
+    function coletarDados(){
+      const itemsEls = Array.from(document.querySelectorAll('#items .item'));
+      const items = itemsEls.map(it => {
+        const num = it.getAttribute('data-num') || '';
+        const title = (it.querySelector('.item-title') || {textContent:''}).textContent.trim();
+        const desc = (it.querySelector('.param-desc') || {value:''}).value.trim();
+        const radios = it.querySelectorAll('input[type=radio]');
+        let selected = null;
+        radios.forEach(r=>{ if(r.checked) selected = r.value; });
+        const obs = (it.querySelector('.obs_input') || {value:''}).value.trim();
+        return { num, title, desc, status: selected, obs };
+      });
+      return {
+        data: dataEl.value,
+        matricula: document.getElementById('matricula').value.trim(),
+        veiculo: document.getElementById('veiculo').value.trim(),
+        hodometro: document.getElementById('hodometro').value.trim(),
+        items
+      };
+    }
+
+    function escapeHtml(t){ if(!t) return ''; return String(t).replace(/[&<>"]|'/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
+
+    async function gerarPDFsalvar(){
+      const data = coletarDados();
+      const report = document.createElement('div');
+      report.style.width = '794px';
+      report.style.padding = '24px';
+      report.style.fontFamily = 'Arial, Helvetica, sans-serif';
+      report.style.background = '#fff';
+      report.style.color = '#111';
+      report.style.boxSizing = 'border-box';
+
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.marginBottom = '12px';
+      header.innerHTML = `<strong>Check-List Diário — Veículos Leves</strong><div style="text-align:right;font-size:12px;color:#444">Data: <strong>${escapeHtml(data.data||'-')}</strong><br>Nº cadastro: <strong>${escapeHtml(data.matricula||'-')}</strong></div>`;
+      report.appendChild(header);
+
+      const meta = document.createElement('div');
+      meta.style.marginBottom = '12px';
+      meta.innerHTML = `<div><strong>Veículo:</strong> ${escapeHtml(data.veiculo||'-')}</div><div><strong>Hodômetro:</strong> ${escapeHtml(data.hodometro||'-')}</div>`;
+      report.appendChild(meta);
+
+      const itemsTitle = document.createElement('div');
+      itemsTitle.innerHTML = '<strong>Itens Verificados</strong>';
+      report.appendChild(itemsTitle);
+
+      data.items.forEach(it=>{
+        const block = document.createElement('div');
+        block.style.marginBottom = '10px';
+        block.style.fontSize = '13px';
+        block.innerHTML = `<div style="font-weight:600">${it.num}. ${it.title}</div><div style="margin-top:6px;margin-left:6px;white-space:pre-wrap">${it.desc}</div><div style="margin-top:6px;margin-left:6px"><strong>Status:</strong> ${(it.status=='conforme'?'Conforme':it.status=='medio'?'Médio':it.status=='fora'?'Fora':'Não marcado')}</div><div style="margin-left:6px;margin-top:6px"><strong>Observação:</strong> ${escapeHtml(it.obs||'-')}</div>`;
+        report.appendChild(block);
+      });
+
+      const footer = document.createElement('div');
+      footer.style.marginTop = '18px';
+      footer.style.fontSize = '11px';
+      footer.style.color = '#666';
+      footer.textContent = 'Gerado por checklist local — reveja antes de enviar por WhatsApp.';
+      report.appendChild(footer);
+
+      report.style.position = 'fixed';
+      report.style.left = '-9999px';
+      document.body.appendChild(report);
+
+      try {
+        const canvas = await html2canvas(report, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+
+        const nomeArquivo = 'checklist_' + new Date().toISOString().slice(0, 10) + '.pdf';
+        pdf.save(nomeArquivo);
+
+        document.getElementById('msgOk').style.display = 'block';
+        setTimeout(()=> document.getElementById('msgOk').style.display = 'none', 6000);
+      } finally {
+        document.body.removeChild(report);
+      }
+    }
+
+    document.getElementById('btnGerar').addEventListener('click', async function(){
+      this.disabled = true;
+      const originalText = this.textContent;
+      this.textContent = 'Gerando PDF...';
+      try { await gerarPDFsalvar(); }
+      catch(e){ alert('Erro ao gerar PDF: ' + e.message); }
+      finally { this.disabled = false; this.textContent = originalText; }
+    });
+
+    document.getElementById('btnInstrucoes').addEventListener('click', ()=>{
+      alert('Após gerar o PDF, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads.');
+    });
+  })();
+  </script>
+</body>
+</html>
