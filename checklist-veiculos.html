@@ -39,264 +39,7 @@
       <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
     </div>
 
-    <div class="items" id="items">
-      <!-- 1 -->
-      <div class="item" data-num="1">
-        <div class="item-title">1. Condição geral</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Sem vazamentos, sem peças ou partes soltas, bancos em condições de assentar, portas fechando, direção alinhada, etc.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Condição geral">
-          <label class="choice"><input type="radio" name="choice_1" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_1" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_1" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 2 -->
-      <div class="item" data-num="2">
-        <div class="item-title">2. Condições dos pneus e rodas</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Calibrados, sem lesões, rasgos e trincas, aparência normal, bom estado conservação, step preso ao suporte. Rodas com todos os parafusos</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Pneus e rodas">
-          <label class="choice"><input type="radio" name="choice_2" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_2" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_2" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 3 -->
-      <div class="item" data-num="3">
-        <div class="item-title">3. Água do radiador</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Sempre completo de acordo com o nível indicado.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Água do radiador">
-          <label class="choice"><input type="radio" name="choice_3" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_3" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_3" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 4 -->
-      <div class="item" data-num="4">
-        <div class="item-title">4. Óleo do motor</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Acusando o nível normal na vareta, sendo trocado na data correta, de acordo com o manual de orientação e manutenção do veículo.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Óleo do motor">
-          <label class="choice"><input type="radio" name="choice_4" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_4" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_4" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 5 -->
-      <div class="item" data-num="5">
-        <div class="item-title">5. Tanque de combustível</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Sem vazamentos/ possuir combustível suficiente.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Tanque de combustível">
-          <label class="choice"><input type="radio" name="choice_5" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_5" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_5" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 6 -->
-      <div class="item" data-num="6">
-        <div class="item-title">6. Extintor de incêndio</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Fixo no suporte, lacrado e carregado (manômetro indicando a faixa verde), dentro do prazo de validade. CLASSE ABC</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Extintor">
-          <label class="choice"><input type="radio" name="choice_6" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_6" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_6" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 7 -->
-      <div class="item" data-num="7">
-        <div class="item-title">7. Luzes e parte elétrica em geral</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Funcionamento perfeito dos faróis e sinalizador de setas, alarme sonoro de ré, limpador de para-brisa, luz freio, faroletes, outros, etc...</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Luzes e elétrica">
-          <label class="choice"><input type="radio" name="choice_7" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_7" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_7" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 8 -->
-      <div class="item" data-num="8">
-        <div class="item-title">8. Buzina</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Deve estar funcionando.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Buzina">
-          <label class="choice"><input type="radio" name="choice_8" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_8" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_8" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 9 -->
-      <div class="item" data-num="9">
-        <div class="item-title">9. Freios em geral</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Freando com eficiência. Freio de estacionamento regulado e funcionando em perfeito estado.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Freios">
-          <label class="choice"><input type="radio" name="choice_9" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_9" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_9" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 10 -->
-      <div class="item" data-num="10">
-        <div class="item-title">10. Bandeirola</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Deve possuir para acesso na área da mina e britagem.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Bandeirola">
-          <label class="choice"><input type="radio" name="choice_10" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_10" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_10" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 11 -->
-      <div class="item" data-num="11">
-        <div class="item-title">11. Triângulo / macaco / chave roda</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Funcionando, testados e em perfeito estado, junto ao veículo.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Triângulo/macaco/chave">
-          <label class="choice"><input type="radio" name="choice_11" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_11" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_11" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 12 -->
-      <div class="item" data-num="12">
-        <div class="item-title">12. Retrovisor / janelas / para-brisa e vidros em geral</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Regulado, sem trincas e em perfeito estado de funcionamento</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Retrovisores/vidros">
-          <label class="choice"><input type="radio" name="choice_12" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_12" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_12" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 13 -->
-      <div class="item" data-num="13">
-        <div class="item-title">13. Cinto de segurança</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Funcionando e em perfeito estado para todos ocupantes</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Cinto de segurança">
-          <label class="choice"><input type="radio" name="choice_13" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_13" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_13" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 14 -->
-      <div class="item" data-num="14">
-        <div class="item-title">14. Sinalizações</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Faixas refletivas conforme padrão. Placas legíveis</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Sinalizações">
-          <label class="choice"><input type="radio" name="choice_14" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_14" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_14" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 15 -->
-      <div class="item" data-num="15">
-        <div class="item-title">15. Giroflex</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Para acesso na área da mina e britagem durante a noite, deve estar funcionando.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Giroflex">
-          <label class="choice"><input type="radio" name="choice_15" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_15" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_15" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-      <!-- 16 -->
-      <div class="item" data-num="16">
-        <div class="item-title">16. Documentação do Veículo</div>
-        <div class="param-desc-label">Descrição do parâmetro</div>
-        <textarea class="param-desc">Ipva, seguro, emplacamento, credenciamento interno dentro da validade.</textarea>
-        <div class="choices" role="radiogroup" aria-label="Status Documentação">
-          <label class="choice"><input type="radio" name="choice_16" value="conforme"> Conforme</label>
-          <label class="choice"><input type="radio" name="choice_16" value="medio"> Médio</label>
-          <label class="choice"><input type="radio" name="choice_16" value="fora"> Fora</label>
-        </div>
-        <div class="obs">
-          <label>Observação</label>
-          <input type="text" class="obs_input" placeholder="Comentário (opcional)">
-        </div>
-      </div>
-
-    </div>
+    <div class="items" id="items"></div>
 
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="btnGerar">Gerar e Salvar PDF</button>
@@ -309,13 +52,53 @@
 
   <script>
   (function(){
-    // preenche data com hoje
     const dataEl = document.getElementById('data');
     const today = new Date();
     function pad(n){return String(n).padStart(2,'0')}
     dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
 
-    // coleta dados do formulário (inclui a descrição do parâmetro)
+    // Gerar itens dinamicamente (mantendo o conteúdo original)
+    const itens = [
+      'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio','Luzes e parte elétrica em geral','Buzina','Freios em geral','Bandeirola','Triângulo / macaco / chave roda','Retrovisor / janelas / para-brisa e vidros em geral','Cinto de segurança','Sinalizações','Giroflex','Documentação do Veículo'
+    ];
+
+    const descs = [
+      'Sem vazamentos, sem peças ou partes soltas, bancos em condições de assentar, portas fechando, direção alinhada, etc.',
+      'Calibrados, sem lesões, rasgos e trincas, aparência normal, bom estado conservação, step preso ao suporte. Rodas com todos os parafusos',
+      'Sempre completo de acordo com o nível indicado.',
+      'Acusando o nível normal na vareta, sendo trocado na data correta, de acordo com o manual de orientação e manutenção do veículo.',
+      'Sem vazamentos/ possuir combustível suficiente.',
+      'Fixo no suporte, lacrado e carregado (manômetro indicando a faixa verde), dentro do prazo de validade. CLASSE ABC',
+      'Funcionamento perfeito dos faróis e sinalizador de setas, alarme sonoro de ré, limpador de para-brisa, luz freio, faroletes, outros, etc...',
+      'Deve estar funcionando.',
+      'Freando com eficiência. Freio de estacionamento regulado e funcionando em perfeito estado.',
+      'Deve possuir para acesso na área da mina e britagem.',
+      'Funcionando, testados e em perfeito estado, junto ao veículo.',
+      'Regulado, sem trincas e em perfeito estado de funcionamento',
+      'Funcionando e em perfeito estado para todos ocupantes',
+      'Faixas refletivas conforme padrão. Placas legíveis',
+      'Para acesso na área da mina e britagem durante a noite, deve estar funcionando.',
+      'Ipva, seguro, emplacamento, credenciamento interno dentro da validade.'
+    ];
+
+    const itemsContainer = document.getElementById('items');
+    itens.forEach((t,i)=>{
+      const n = i+1;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.setAttribute('data-num',n);
+      div.innerHTML = `<div class="item-title">${n}. ${t}</div>
+        <div class="param-desc-label">Descrição do parâmetro</div>
+        <textarea class="param-desc">${descs[i]}</textarea>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="choice_${n}" value="conforme"> Conforme</label>
+          <label class="choice"><input type="radio" name="choice_${n}" value="medio"> Médio</label>
+          <label class="choice"><input type="radio" name="choice_${n}" value="fora"> Fora</label>
+        </div>
+        <div class="obs"><label>Observação</label><input type="text" class="obs_input" placeholder="Comentário (opcional)"></div>`;
+      itemsContainer.appendChild(div);
+    });
+
     function coletarDados(){
       const itemsEls = Array.from(document.querySelectorAll('#items .item'));
       const items = itemsEls.map(it => {
@@ -337,13 +120,10 @@
       };
     }
 
-    function escapeHtml(t){ if(!t) return ''; return String(t).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+    function escapeHtml(t){ if(!t) return ''; return String(t).replace(/[&<>"]|'/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
 
-    // Gera o relatório DOM, anexa ao body (oculto -> fora da tela), chama html2canvas e remove
     async function gerarPDFsalvar(){
       const data = coletarDados();
-
-      // build report container (A4-ish width)
       const report = document.createElement('div');
       report.style.width = '794px';
       report.style.padding = '24px';
@@ -352,36 +132,19 @@
       report.style.color = '#111';
       report.style.boxSizing = 'border-box';
 
-      // header
       const header = document.createElement('div');
       header.style.display = 'flex';
       header.style.justifyContent = 'space-between';
-      header.style.alignItems = 'flex-start';
       header.style.marginBottom = '12px';
-      const leftHeader = document.createElement('div');
-      leftHeader.innerHTML = '<strong>Check-List Diário — Veículos Leves</strong>';
-      header.appendChild(leftHeader);
-      const rightHeader = document.createElement('div');
-      rightHeader.style.textAlign = 'right';
-      rightHeader.innerHTML = `
-        <div style="font-size:12px;color:#444">Data: <strong>${escapeHtml(data.data || '-')}</strong></div>
-        <div style="font-size:12px;color:#444">Nº cadastro: <strong>${escapeHtml(data.matricula || '-')}</strong></div>
-      `;
-      header.appendChild(rightHeader);
+      header.innerHTML = `<strong>Check-List Diário — Veículos Leves</strong><div style="text-align:right;font-size:12px;color:#444">Data: <strong>${escapeHtml(data.data||'-')}</strong><br>Nº cadastro: <strong>${escapeHtml(data.matricula||'-')}</strong></div>`;
       report.appendChild(header);
 
-      // meta
       const meta = document.createElement('div');
       meta.style.marginBottom = '12px';
-      meta.innerHTML = `
-        <div><strong>Veículo:</strong> ${escapeHtml(data.veiculo || '-')}</div>
-        <div><strong>Hodômetro:</strong> ${escapeHtml(data.hodometro || '-')}</div>
-      `;
+      meta.innerHTML = `<div><strong>Veículo:</strong> ${escapeHtml(data.veiculo||'-')}</div><div><strong>Hodômetro:</strong> ${escapeHtml(data.hodometro||'-')}</div>`;
       report.appendChild(meta);
 
-      // items
       const itemsTitle = document.createElement('div');
-      itemsTitle.style.margin = '8px 0';
       itemsTitle.innerHTML = '<strong>Itens Verificados</strong>';
       report.appendChild(itemsTitle);
 
@@ -389,34 +152,7 @@
         const block = document.createElement('div');
         block.style.marginBottom = '10px';
         block.style.fontSize = '13px';
-
-        const title = document.createElement('div');
-        title.style.fontWeight = '600';
-        title.textContent = (it.num ? it.num + '. ' : '') + it.title;
-        block.appendChild(title);
-
-        if(it.desc){
-          const desc = document.createElement('div');
-          desc.style.marginTop = '6px';
-          desc.style.marginLeft = '6px';
-          desc.style.whiteSpace = 'pre-wrap';
-          desc.textContent = it.desc;
-          block.appendChild(desc);
-        }
-
-        const statusMap = { 'conforme':'Conforme', 'medio':'Médio', 'fora':'Fora', null:'Não marcado' };
-        const st = document.createElement('div');
-        st.style.marginTop = '6px';
-        st.style.marginLeft = '6px';
-        st.innerHTML = `<strong>Status:</strong> ${statusMap[it.status] || 'Não marcado'}`;
-        block.appendChild(st);
-
-        const obs = document.createElement('div');
-        obs.style.marginLeft = '6px';
-        obs.style.marginTop = '6px';
-        obs.innerHTML = `<strong>Observação:</strong> ${escapeHtml(it.obs || '-')}`;
-        block.appendChild(obs);
-
+        block.innerHTML = `<div style="font-weight:600">${it.num}. ${it.title}</div><div style="margin-top:6px;margin-left:6px;white-space:pre-wrap">${it.desc}</div><div style="margin-top:6px;margin-left:6px"><strong>Status:</strong> ${(it.status=='conforme'?'Conforme':it.status=='medio'?'Médio':it.status=='fora'?'Fora':'Não marcado')}</div><div style="margin-left:6px;margin-top:6px"><strong>Observação:</strong> ${escapeHtml(it.obs||'-')}</div>`;
         report.appendChild(block);
       });
 
@@ -427,52 +163,56 @@
       footer.textContent = 'Gerado por checklist local — reveja antes de enviar por WhatsApp.';
       report.appendChild(footer);
 
-      // --- append to DOM but keep off-screen/invisible while rendering ---
       report.style.position = 'fixed';
       report.style.left = '-9999px';
-      report.style.top = '0';
       document.body.appendChild(report);
 
-      try{
+      try {
         const canvas = await html2canvas(report, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+
         const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         const imgProps = pdf.getImageProperties(imgData);
         const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
-        const nomeArquivo = 'checklist_' + new Date().toISOString().slice(0,10) + '.pdf';
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+
+        const nomeArquivo = 'checklist_' + new Date().toISOString().slice(0, 10) + '.pdf';
         pdf.save(nomeArquivo);
-        // success
+
         document.getElementById('msgOk').style.display = 'block';
         setTimeout(()=> document.getElementById('msgOk').style.display = 'none', 6000);
       } finally {
-        // cleanup
         document.body.removeChild(report);
       }
     }
 
-    // bind gerar
     document.getElementById('btnGerar').addEventListener('click', async function(){
       this.disabled = true;
       const originalText = this.textContent;
       this.textContent = 'Gerando PDF...';
-      try {
-        await gerarPDFsalvar();
-      } catch(e){
-        console.error(e);
-        alert('Erro ao gerar PDF: ' + (e && e.message ? e.message : e));
-      } finally {
-        this.disabled = false;
-        this.textContent = originalText;
-      }
+      try { await gerarPDFsalvar(); }
+      catch(e){ alert('Erro ao gerar PDF: ' + e.message); }
+      finally { this.disabled = false; this.textContent = originalText; }
     });
 
-    document.getElementById('btnInstrucoes').addEventListener('click', function(){
-      alert('Após gerar o PDF, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads. O nome começa com "checklist_".');
+    document.getElementById('btnInstrucoes').addEventListener('click', ()=>{
+      alert('Após gerar o PDF, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads.');
     });
-
   })();
   </script>
 </body>
