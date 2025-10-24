@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -50,7 +50,7 @@
     </div>
 
     <div class="msg" id="msgOk">✅ Arquivo gerado com sucesso! Verifique sua pasta de downloads.</div>
-    <div style="margin-top:10px;font-size:13px;color:#666">Os arquivos serão gerados com nome <strong>checklist_YYYY-MM-DD</strong>.</div>
+    <div style="margin-top:10px;font-size:13px;color:#666">Os arquivos serão gerados com nome <strong>checklist_NOMECADASTRO_YYYY-MM-DD</strong>.</div>
   </div>
 
   <script>
@@ -114,6 +114,10 @@
       }));
     }
 
+    function limparNomeArquivo(nome){
+      return nome.replace(/[^a-z0-9_-]/gi, '_'); // substitui caracteres inválidos por "_"
+    }
+
     async function gerarPDFsalvar(){
       const dados = {
         data: dataEl.value,
@@ -122,6 +126,10 @@
         hodometro: document.getElementById('hodometro').value.trim(),
         items: coletarDados()
       };
+
+      const nomeFuncionario = limparNomeArquivo(dados.matricula || 'sem_nome');
+      const dataArquivo = new Date().toISOString().slice(0,10);
+      const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.pdf`;
 
       const report = document.createElement('div');
       report.style.width = '794px';
@@ -161,7 +169,7 @@
 
       let heightLeft = imgHeight;
       let position = 0;
-      const overlap = 15; // evita corte de texto
+      const overlap = 15;
 
       pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
       heightLeft -= (pdfHeight - overlap);
@@ -173,16 +181,21 @@
         heightLeft -= (pdfHeight - overlap);
       }
 
-      pdf.save('checklist_' + new Date().toISOString().slice(0,10) + '.pdf');
+      pdf.save(nomeArquivo);
       document.body.removeChild(report);
       msgOK();
     }
 
     function gerarExcel(){
       const dados = coletarDados();
+      const matricula = document.getElementById('matricula').value.trim();
+      const nomeFuncionario = limparNomeArquivo(matricula || 'sem_nome');
+      const dataArquivo = new Date().toISOString().slice(0,10);
+      const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
+
       const linhas = dados.map(it => ({
         Data: dataEl.value,
-        Matricula: document.getElementById('matricula').value.trim(),
+        Matricula: matricula,
         Veiculo: document.getElementById('veiculo').value.trim(),
         Hodometro: document.getElementById('hodometro').value.trim(),
         Numero: it.num,
@@ -195,7 +208,7 @@
       const ws = XLSX.utils.json_to_sheet(linhas);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
-      XLSX.writeFile(wb, 'checklist_' + new Date().toISOString().slice(0,10) + '.xlsx');
+      XLSX.writeFile(wb, nomeArquivo);
       msgOK();
     }
 
@@ -212,4 +225,3 @@
   </script>
 </body>
 </html>
-
