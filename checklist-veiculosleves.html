@@ -60,32 +60,9 @@
     const dataEl = document.getElementById('data');
     const horaEl = document.getElementById('hora');
     const today = new Date();
-    const pad = n => String(n).padStart(2, '0');
-
-    // Função: ajustar data/hora com regras de horário e fim de semana
-    function ajustarDataHora() {
-      const agora = new Date();
-      let diaSemana = agora.getDay(); // 0=Domingo, 6=Sábado
-      let hora = agora.getHours();
-      let min = agora.getMinutes();
-
-      // Sábado ou domingo → usar sexta (último dia útil)
-      if (diaSemana === 6) { // Sábado
-        agora.setDate(agora.getDate() - 1);
-        hora = 16; min = 0;
-      } else if (diaSemana === 0) { // Domingo
-        agora.setDate(agora.getDate() - 2);
-        hora = 16; min = 0;
-      } else {
-        if (hora < 7) hora = 7;
-        if (hora > 16) hora = 16;
-      }
-
-      dataEl.value = agora.getFullYear() + '-' + pad(agora.getMonth() + 1) + '-' + pad(agora.getDate());
-      horaEl.value = pad(hora) + ':' + pad(min);
-    }
-
-    ajustarDataHora();
+    function pad(n){return String(n).padStart(2,'0')}
+    dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+    horaEl.value = pad(today.getHours()) + ':' + pad(today.getMinutes());
 
     const itens = [
       'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio',
@@ -113,21 +90,24 @@
     ];
 
     const itensComNaoSeAplica = [6,10,14,15];
-    const itemsContainer = document.getElementById('items');
 
+    const itemsContainer = document.getElementById('items');
     itens.forEach((t,i)=>{
       const n = i+1;
       const div = document.createElement('div');
       div.className = 'item';
       div.setAttribute('data-num',n);
+
       let choicesHTML = `
         <label class="choice"><input type="radio" name="choice_${n}" value="conforme"> Conforme</label>
         <label class="choice"><input type="radio" name="choice_${n}" value="medio"> Médio</label>
         <label class="choice"><input type="radio" name="choice_${n}" value="fora"> Fora</label>
       `;
+
       if (itensComNaoSeAplica.includes(n)) {
         choicesHTML += `<label class="choice"><input type="radio" name="choice_${n}" value="nao_se_aplica" checked> Não se aplica</label>`;
       }
+
       div.innerHTML = `
         <div class="item-title">${n}. ${t}</div>
         <div class="param-desc-label">Descrição do parâmetro</div>
@@ -149,7 +129,9 @@
       }));
     }
 
-    function limparNomeArquivo(nome){ return nome.replace(/[^a-z0-9_-]/gi, '_'); }
+    function limparNomeArquivo(nome){
+      return nome.replace(/[^a-z0-9_-]/gi, '_');
+    }
 
     async function gerarPDFsalvar(){
       const dados = {
@@ -195,16 +177,19 @@
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgProps = pdf.getImageProperties(imgData);
       const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
       let heightLeft = imgHeight;
       let position = 0;
       const overlap = 15;
 
       pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
       heightLeft -= (pdfHeight - overlap);
+
       while (heightLeft > 0) {
         position = heightLeft - imgHeight + overlap;
         pdf.addPage();
@@ -225,7 +210,7 @@
       const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
 
       const linhas = dados.map(it => ({
-        Data: dataEl.value.split('-').reverse().join('/'),
+        Data: new Date(dataEl.value).toLocaleDateString('pt-BR'),
         Horario: horaEl.value,
         Matricula: matricula,
         Veiculo: document.getElementById('veiculo').value.trim(),
