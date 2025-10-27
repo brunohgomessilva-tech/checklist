@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>RDS â€” RelatÃ³rio DiÃ¡rio de ServiÃ§o (Gerador)</title>
+<title>RDS — Relatório Diário de Serviço (Gerador)</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -41,7 +41,7 @@
 <body>
 <div class="container">
   <div class="card">
-    <h1>Gerador de RDS â€” RelatÃ³rio DiÃ¡rio de ServiÃ§o</h1>
+    <h1>Gerador de RDS — Relatório Diário de Serviço</h1>
 
     <div class="row">
       <div class="col small"><label>Data</label><input id="rds_data" type="date"></div>
@@ -50,12 +50,12 @@
         <label>Contratante</label>
         <select id="rds_contratante">
           <option value="">Selecione...</option>
-          <option>MineraÃ§Ã£o Belocal</option>
+          <option>Mineração Belocal</option>
           <option>Lhoist</option>
         </select>
       </div>
       <div class="col">
-       <label>ServiÃ§o</label>
+       <label>Serviço</label>
         <select id="rds_servico">
           <option value="">Selecione...</option>
           <option>LIMP ADMINISTRATIVA - ARCOS</option>
@@ -65,56 +65,56 @@
           <option>LIMP INDUSTRIAL FORNOS MAERZ</option>
           <option>LIMP INDUSTRIAL BRITAGEM</option>
           <option>LIMP INDUSTRIAL MOAGEM 01 e 02 CARBONATOS</option>
-          <option>LIMPEZA BALANÃ‡A</option>
+          <option>LIMPEZA BALANÇA</option>
           <option>ALMOXARIFE I</option>
           <option>ALMOXARIFE II</option>
           <option>OPERADOR DE LOGISTICA</option>
           <option>OP. MAQUINAS PESADAS (BRITAGEM) - MOTORISTAS</option>
           <option>OP. MAQUINAS SIMPLES (MINA) - MOTORISTAS</option>
           <option>OP. MAQUINAS II (PA CARREGADEIRA)</option>
-          <option>OP. DE CAMINHÃƒO PRODUÃ‡ÃƒO</option>
-          <option>MECÃ‚NICO (MANUTENÃ‡ÃƒO DE EQUIPAMENTO)</option>
+          <option>OP. DE CAMINHÃO PRODUÇÃO</option>
+          <option>MECÂNICO (MANUTENÇÃO DE EQUIPAMENTO)</option>
           <option>COLETA E TRANSPORTES DE RESIDUOS I</option>
           <option>COLETA E TRANSPORTES DE RESIDUOS II</option>
           <option>LIMP. INDUSTRIAL DRS</option>
           <option>TECNICO LABORATORIO</option>
           <option>LIMPEZA INDUSTRIAL - SPOT</option>
           <option>LIMPEZA INDUSTRIAL - ALMOXARIFADO</option>
-          <option>SERV. ABAST. DE COMBUSTIVEIS SÃ“LIDOS (coque e moinha)</option>
+          <option>SERV. ABAST. DE COMBUSTIVEIS SÓLIDOS (coque e moinha)</option>
           <option>SERV. CARREGAMENTO DE FINOS DE CALCARIO (Britagem)</option>
-          <option>SERV. DIVERSOS PARA ÃREA DE QUALIDADE (CAL)</option>
-          <option>SERV. ABAST. DE COMBUSTIVEIS SÃ“LIDOS (Biomassa)</option>
+          <option>SERV. DIVERSOS PARA ÁREA DE QUALIDADE (CAL)</option>
+          <option>SERV. ABAST. DE COMBUSTIVEIS SÓLIDOS (Biomassa)</option>
           <option>SERV. CARREGAMENTO DE FINOS DE CALCARIO SAFRA</option>
         </select>
       </div>
     </div>
 
     <div class="row">
-      <div class="col"><label>HorÃ¡rio de Trabalho</label><input id="rds_horario_trabalho" type="text" placeholder="Ex: 07:00 Ã s 16:48 - SEG A SEX"></div>
-      <div class="col"><label>FÃ¡brica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
+      <div class="col"><label>Horário de Trabalho</label><input id="rds_horario_trabalho" type="text" placeholder="Ex: 07:00 às 16:48 - SEG A SEX"></div>
+      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
     </div>
 
     <div style="margin-top:8px" class="row">
-      <div class="col"><label>DiÃ¡logo DiÃ¡rio de SeguranÃ§a (DDS) â€” Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
-      <div class="col small"><label>HorÃ¡rio do DDS</label><input id="rds_horario_dds" type="text" placeholder="Ex: 07:00"></div>
+      <div class="col"><label>Diálogo Diário de Segurança (DDS) — Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
+      <div class="col small"><label>Horário do DDS</label><input id="rds_horario_dds" type="text" placeholder="Ex: 07:00"></div>
     </div>
 
     <hr style="margin:12px 0">
 
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="muted">Tabela de funcionÃ¡rios (20 linhas automÃ¡ticas)</div>
+      <div class="muted">Tabela de funcionários (20 linhas automáticas)</div>
       <button id="btnAdd" class="btn">Adicionar linha</button>
     </div>
 
     <table class="table" id="tblFuncionarios">
       <thead>
         <tr>
-          <th style="width:80px">CÃ³digo</th>
-          <th>FuncionÃ¡rio</th>
+          <th style="width:80px">Código</th>
+          <th>Funcionário</th>
           <th style="width:100px">Entrada</th>
-          <th style="width:100px">SaÃ­da</th>
-          <th>ObservaÃ§Ã£o</th>
-          <th style="width:70px">AÃ§Ãµes</th>
+          <th style="width:100px">Saída</th>
+          <th>Observação</th>
+          <th style="width:70px">Ações</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -128,18 +128,18 @@
   </div>
 </div>
 
-<!-- Ã¡rea oculta para gerar o PDF -->
+<!-- área oculta para gerar o PDF -->
 <div id="paper" style="display:none">
   <div class="rds-paper" id="rds_report">
     <div class="rds-header">
       <div>
         <div style="font-size:12px">COMERCIAL ARCOS LTDA</div>
         <div style="font-size:11px;color:#333;margin-top:4px">
-          ROD BR 354, KM 474, NÂº 749 - VILA CALCITA - ARCOS/MG - CEP: 35600-350
+          ROD BR 354, KM 474, Nº 749 - VILA CALCITA - ARCOS/MG - CEP: 35600-350
         </div>
       </div>
       <div style="text-align:right">
-        <div style="font-weight:700">RELATÃ“RIO DIÃRIO DE SERVIÃ‡O (RDS)</div>
+        <div style="font-weight:700">RELATÓRIO DIÁRIO DE SERVIÇO (RDS)</div>
         <div class="rds-meta" id="meta_data">DATA:</div>
         <div class="rds-meta" id="meta_hora_doc">HORA:</div>
       </div>
@@ -148,31 +148,31 @@
     <table class="rds-table" style="margin-top:12px">
       <tr>
         <td><strong>CONTRATANTE:</strong><div id="meta_contratante"></div></td>
-        <td><strong>SERVIÃ‡O:</strong><div id="meta_servico"></div></td>
-        <td><strong>FÃBRICA / LOCAL:</strong><div id="meta_fabrica"></div></td>
+        <td><strong>SERVIÇO:</strong><div id="meta_servico"></div></td>
+        <td><strong>FÁBRICA / LOCAL:</strong><div id="meta_fabrica"></div></td>
       </tr>
       <tr>
-        <td><strong>HORÃRIO DE TRABALHO:</strong><div id="meta_horario_trabalho"></div></td>
+        <td><strong>HORÁRIO DE TRABALHO:</strong><div id="meta_horario_trabalho"></div></td>
         <td><strong>TEMA (DDS):</strong><div id="meta_tema"></div></td>
-        <td><strong>HORÃRIO DO DDS:</strong><div id="meta_horario_dds"></div></td>
+        <td><strong>HORÁRIO DO DDS:</strong><div id="meta_horario_dds"></div></td>
       </tr>
     </table>
 
     <table class="rds-table" id="rds_table_func" style="margin-top:12px">
       <thead>
         <tr>
-          <th style="width:60px">CÃ“DIGO</th>
+          <th style="width:60px">CÓDIGO</th>
           <th>NOME</th>
           <th style="width:80px">ENTRADA</th>
-          <th style="width:80px">SAÃDA</th>
-          <th>OBSERVAÃ‡ÃƒO</th>
+          <th style="width:80px">SAÍDA</th>
+          <th>OBSERVAÇÃO</th>
         </tr>
       </thead>
       <tbody id="rds_func_rows"></tbody>
     </table>
 
     <div style="margin-top:10px;font-size:12px">
-      <strong>DIÃLOGO DIÃRIO DE SEGURANÃ‡A (DDS)</strong>
+      <strong>DIÁLOGO DIÁRIO DE SEGURANÇA (DDS)</strong>
       <div id="rds_dds" style="margin-top:6px;min-height:36px"></div>
     </div>
 
@@ -190,14 +190,14 @@
 </div>
 
 <script>
-// --- DATA E HORA AUTOMÃTICA ---
+// --- DATA E HORA AUTOMÁTICA ---
 window.addEventListener('DOMContentLoaded',()=>{
   const now=new Date();
   $('rds_data').value=now.toISOString().slice(0,10);
   $('rds_hora_doc').value=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 });
 
-// --- FUNCIONÃRIOS ---
+// --- FUNCIONÁRIOS ---
   const funcionarios = [
 {codigo:"00225",nome:"WANTUIR BERTOLDO DA SILVA"},
 {codigo:"01350",nome:"MARIA DA CONCEICAO ARANTES"},
@@ -218,11 +218,11 @@ window.addEventListener('DOMContentLoaded',()=>{
 {codigo:"01807",nome:"MICHELINE JOSE COUTINHO DO VALE"},
 {codigo:"01811",nome:"JOSE ANTONIO DA SILVA"},
 {codigo:"01818",nome:"ABGAIR DE JESUS DA SILVA"},
-{codigo:"01844",nome:"JANE OLIVEIRA GUSMÃƒO"},
+{codigo:"01844",nome:"JANE OLIVEIRA GUSMÃO"},
 {codigo:"01849",nome:"JORDANIA APARECIDA LOPES"},
 {codigo:"01853",nome:"SERGIO MAXIMIANO DA SILVA"},
 {codigo:"01854",nome:"JOSE SOARES JUNIOR"},
-{codigo:"01857",nome:"DANIELE CAMPOS DE ASSUNÃ‡ÃƒO"},
+{codigo:"01857",nome:"DANIELE CAMPOS DE ASSUNÇÃO"},
 {codigo:"01886",nome:"NAIBIA MARIA SOUZA LIMA"},
 {codigo:"01900",nome:"EDER DE ARAUJO SILVA"},
 {codigo:"01906",nome:"JADER LUIS DA SILVA"},
@@ -240,15 +240,15 @@ window.addEventListener('DOMContentLoaded',()=>{
 {codigo:"01937",nome:"EDVALDO VIEIRA DA SILVA"},
 {codigo:"01944",nome:"ADEONES PAULO DA SILVA"},
 {codigo:"01945",nome:"FERNANDA TEIXEIRA COUTO"},
-{codigo:"01946",nome:"PERPÃ‰TUA APARECIDA MARÃ‡AL"},
-{codigo:"01955",nome:"DANIEL JUNIO MARÃ‡AL"},
+{codigo:"01946",nome:"PERPÉTUA APARECIDA MARÇAL"},
+{codigo:"01955",nome:"DANIEL JUNIO MARÇAL"},
 {codigo:"01957",nome:"ROGERIO EDUARDO OLIVEIRA"},
 {codigo:"01962",nome:"SIRLEIA REGINA DE FARIA SILVA"},
 {codigo:"01965",nome:"HENRIQUE MAGNO SANTOS ALMEIDA"},
 {codigo:"01967",nome:"IGOR APARECIDO GONZAGA"},
 {codigo:"01969",nome:"JULIANO UMBERTO DE SALES SILVA"},
 {codigo:"01970",nome:"JEANCARLOS JUNIOR DA SILVA"},
-{codigo:"01971",nome:"MONICA GONÃ‡ALVES COSTA"},
+{codigo:"01971",nome:"MONICA GONÇALVES COSTA"},
 {codigo:"01973",nome:"DAIANE LIMA NOGUEIRA"},
 {codigo:"01977",nome:"ISILEI DE FATIMA SILVA"},
 {codigo:"01979",nome:"CARLOS ALBERTO MARRERO MEDINA"},
@@ -271,7 +271,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 {codigo:"02000",nome:"WILLIAN DOS SANTOS EVANGELINO"},
 {codigo:"02001",nome:"FABIANO GERALDO MARTINS"},
 {codigo:"02002",nome:"EDER LUIS DUQUE"},
-{codigo:"02003",nome:"JOÃƒO VICTOR SANTOS"},
+{codigo:"02003",nome:"JOÃO VICTOR SANTOS"},
 {codigo:"02004",nome:"RODRIGO SOUZA AIRES"},
 {codigo:"02005",nome:"CRISTINA LOPES GOMES"},
 {codigo:"02006",nome:"JOSE MARIA DA COSTA"},
@@ -288,7 +288,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 {codigo:"02017",nome:"ANNA VITORIA TAVARES DA PAIXAO"},
 {codigo:"02018",nome:"MAICON SANTOS LIMA"},
 {codigo:"02019",nome:"JUNIOR WESLEY MESSIAS"},
-{codigo:"02020",nome:"JUSCELINA GONÃ‡ALVES DE OLIVEIRA"},
+{codigo:"02020",nome:"JUSCELINA GONÇALVES DE OLIVEIRA"},
 {codigo:"02021",nome:"EBERSON DAVID DA SILVA LIMA"},
 {codigo:"02022",nome:"GABRIELA MARTINS CALIXTO"},
 {codigo:"02023",nome:"GEYCILAYNE TELES SANTOS"},
@@ -307,7 +307,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   ];
 
 
-// --- FUNÃ‡Ã•ES ---
+// --- FUNÇÕES ---
 const $ = id => document.getElementById(id);
 const tblBody = document.querySelector('#tblFuncionarios tbody');
 
@@ -346,8 +346,8 @@ function addRow(data={}) {
   tdFuncionario.appendChild(selectFuncionario);
   tr.innerHTML+=`<td></td><td></td>
   <td><input type="text" placeholder="Entrada" style="width:100%"></td>
-  <td><input type="text" placeholder="SaÃ­da" style="width:100%"></td>
-  <td><input type="text" placeholder="ObservaÃ§Ã£o" style="width:100%"></td>
+  <td><input type="text" placeholder="Saída" style="width:100%"></td>
+  <td><input type="text" placeholder="Observação" style="width:100%"></td>
   <td><button class="remove-btn">Remover</button></td>`;
   tr.children[0].replaceWith(tdCodigo);
   tr.children[1].replaceWith(tdFuncionario);
@@ -402,5 +402,7 @@ $('btnGerarPDF').onclick=async()=>{
 </script>
 </body>
 </html>
+
+
 
 
