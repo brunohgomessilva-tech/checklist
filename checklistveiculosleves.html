@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checklist Veículos Leves</title>
+  <title>Check-List Diário — Veículos Leves</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -14,7 +14,8 @@
     .row{display:flex;gap:8px;flex-wrap:wrap}
     .col{flex:1;min-width:120px;display:flex;flex-direction:column;margin-bottom:8px}
     label{font-size:13px;margin-bottom:6px;color:#222}
-    input[type=text], input[type=date], textarea {padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff}
+    input[type=text], input[type=date], input[type=time], textarea {padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff}
+    input[readonly]{background:#eee;cursor:not-allowed}
     textarea.param-desc{min-height:48px;resize:vertical}
     .items{margin-top:12px}
     .item{border:1px solid #eee;padding:10px;border-radius:6px;margin-bottom:8px;background:#fafafa}
@@ -37,7 +38,8 @@
     <div class="row">
       <div class="col"><label for="matricula">Nome ou nº cadastro do funcionário</label><input id="matricula" type="text" placeholder="Número de cadastro"></div>
       <div class="col"><label for="veiculo">Veículo</label><input id="veiculo" type="text" placeholder="Ex: ABC 1C34"></div>
-      <div class="col"><label for="data">Data</label><input id="data" type="date"></div>
+      <div class="col"><label for="data">Data</label><input id="data" type="date" readonly></div>
+      <div class="col" style="max-width:120px"><label for="hora">Horário</label><input id="hora" type="time" readonly></div>
       <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
     </div>
 
@@ -50,15 +52,46 @@
     </div>
 
     <div class="msg" id="msgOk">✅ Arquivo gerado com sucesso! Verifique sua pasta de downloads.</div>
-    <div style="margin-top:10px;font-size:13px;color:#666">Os arquivos serão gerados com nome <strong>checklist_NOMECADASTRO_YYYY-MM-DD</strong>.</div>
+    <div style="margin-top:10px;font-size:13px;color:#666">Os arquivos serão gerados com nome <strong>checklist_NOMECADASTRO_YYYY-MM-DD-HH-MM</strong>.</div>
   </div>
 
   <script>
   (function(){
     const dataEl = document.getElementById('data');
-    const today = new Date();
-    function pad(n){return String(n).padStart(2,'0')}
-    dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+    const horaEl = document.getElementById('hora');
+    const pad = n => String(n).padStart(2, '0');
+
+    // Função: ajustar data/hora com regras de horário e fim de semana
+    function ajustarDataHora() {
+      const agora = new Date();
+      let diaSemana = agora.getDay(); // 0=Domingo, 6=Sábado
+      let hora = agora.getHours();
+      let min = agora.getMinutes();
+
+      // Sábado ou domingo → usar sexta (último dia útil)
+      if (diaSemana === 6) { // Sábado
+        agora.setDate(agora.getDate() - 1);
+        hora = 16; min = 0;
+      } else if (diaSemana === 0) { // Domingo
+        agora.setDate(agora.getDate() - 2);
+        hora = 16; min = 0;
+      } else {
+        // Antes de 07:30 → trava em 07:30
+        if (hora < 7 || (hora === 7 && min < 30)) {
+          hora = 7; min = 30;
+        }
+        // Após 16:00 → trava em 16:00
+        else if (hora > 16 || (hora === 16 && min > 0)) {
+          hora = 16; min = 0;
+        }
+        // Entre 07:30 e 16:00 → hora real (sem alteração)
+      }
+
+      dataEl.value = agora.getFullYear() + '-' + pad(agora.getMonth() + 1) + '-' + pad(agora.getDate());
+      horaEl.value = pad(hora) + ':' + pad(min);
+    }
+
+    ajustarDataHora();
 
     const itens = [
       'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio',
@@ -85,26 +118,22 @@
       'Ipva, seguro, emplacamento, credenciamento interno dentro da validade.'
     ];
 
-    const itensComNaoSeAplica = [6,10,14,15]; // agora sem o 11
-
+    const itensComNaoSeAplica = [6,10,14,15];
     const itemsContainer = document.getElementById('items');
+
     itens.forEach((t,i)=>{
       const n = i+1;
       const div = document.createElement('div');
       div.className = 'item';
       div.setAttribute('data-num',n);
-      
       let choicesHTML = `
         <label class="choice"><input type="radio" name="choice_${n}" value="conforme"> Conforme</label>
         <label class="choice"><input type="radio" name="choice_${n}" value="medio"> Médio</label>
         <label class="choice"><input type="radio" name="choice_${n}" value="fora"> Fora</label>
       `;
-
-      // adiciona "Não se aplica" nos itens específicos
       if (itensComNaoSeAplica.includes(n)) {
         choicesHTML += `<label class="choice"><input type="radio" name="choice_${n}" value="nao_se_aplica" checked> Não se aplica</label>`;
       }
-
       div.innerHTML = `
         <div class="item-title">${n}. ${t}</div>
         <div class="param-desc-label">Descrição do parâmetro</div>
@@ -119,20 +148,19 @@
       const itemsEls = Array.from(document.querySelectorAll('#items .item'));
       return itemsEls.map(it => ({
         num: it.getAttribute('data-num'),
-        title: it.querySelector('.item-title').textContent.trim(),
+        title: it.querySelector('.item-title').textContent.replace(/^\d+\.\s*/,'').trim(),
         desc: it.querySelector('.param-desc').value.trim(),
         status: Array.from(it.querySelectorAll('input[type=radio]')).find(r=>r.checked)?.value || '',
         obs: it.querySelector('.obs_input').value.trim()
       }));
     }
 
-    function limparNomeArquivo(nome){
-      return nome.replace(/[^a-z0-9_-]/gi, '_');
-    }
+    function limparNomeArquivo(nome){ return nome.replace(/[^a-z0-9_-]/gi, '_'); }
 
     async function gerarPDFsalvar(){
       const dados = {
         data: dataEl.value,
+        hora: horaEl.value,
         matricula: document.getElementById('matricula').value.trim(),
         veiculo: document.getElementById('veiculo').value.trim(),
         hodometro: document.getElementById('hodometro').value.trim(),
@@ -140,7 +168,7 @@
       };
 
       const nomeFuncionario = limparNomeArquivo(dados.matricula || 'sem_nome');
-      const dataArquivo = new Date().toISOString().slice(0,10);
+      const dataArquivo = `${dados.data}-${dados.hora.replace(':','-')}`;
       const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.pdf`;
 
       const report = document.createElement('div');
@@ -152,7 +180,7 @@
       report.style.boxSizing = 'border-box';
       report.innerHTML = `
         <h2>Check-List Diário — Veículos Leves</h2>
-        <div><strong>Data:</strong> ${dados.data || '-'}<br>
+        <div><strong>Data:</strong> ${dados.data || '-'} &nbsp;&nbsp; <strong>Horário:</strong> ${dados.hora || '-'}<br>
         <strong>Nº cadastro:</strong> ${dados.matricula || '-'}<br>
         <strong>Veículo:</strong> ${dados.veiculo || '-'}<br>
         <strong>Hodômetro:</strong> ${dados.hodometro || '-'}</div>
@@ -169,24 +197,20 @@
       });
 
       document.body.appendChild(report);
-
       const canvas = await html2canvas(report, { scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
-
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgProps = pdf.getImageProperties(imgData);
       const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
       let heightLeft = imgHeight;
       let position = 0;
       const overlap = 15;
 
       pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
       heightLeft -= (pdfHeight - overlap);
-
       while (heightLeft > 0) {
         position = heightLeft - imgHeight + overlap;
         pdf.addPage();
@@ -203,11 +227,12 @@
       const dados = coletarDados();
       const matricula = document.getElementById('matricula').value.trim();
       const nomeFuncionario = limparNomeArquivo(matricula || 'sem_nome');
-      const dataArquivo = new Date().toISOString().slice(0,10);
+      const dataArquivo = `${dataEl.value}-${horaEl.value.replace(':','-')}`;
       const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
 
       const linhas = dados.map(it => ({
-        Data: dataEl.value,
+        Data: dataEl.value.split('-').reverse().join('/'),
+        Horario: horaEl.value,
         Matricula: matricula,
         Veiculo: document.getElementById('veiculo').value.trim(),
         Hodometro: document.getElementById('hodometro').value.trim(),
