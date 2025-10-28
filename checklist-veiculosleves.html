@@ -14,7 +14,7 @@
     .row{display:flex;gap:8px;flex-wrap:wrap}
     .col{flex:1;min-width:120px;display:flex;flex-direction:column;margin-bottom:8px}
     label{font-size:13px;margin-bottom:6px;color:#222}
-    input[type=text], input[type=date], input[type=time], textarea {padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff}
+    input[type=text], input[type=date], input[type=time], textarea, select {padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff}
     input[readonly]{background:#eee;cursor:not-allowed}
     textarea.param-desc{min-height:48px;resize:vertical}
     .items{margin-top:12px}
@@ -36,8 +36,18 @@
     <h1>Check-List Diário — Veículos Leves</h1>
 
     <div class="row">
-      <div class="col"><label for="matricula">Nome ou nº cadastro do funcionário</label><input id="matricula" type="text" placeholder="Número de cadastro"></div>
-      <div class="col"><label for="veiculo">Veículo</label><input id="veiculo" type="text" placeholder="Ex: ABC 1C34"></div>
+      <div class="col">
+        <label for="matricula">Funcionário</label>
+        <select id="matricula">
+          <option value="">Selecione o funcionário</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="veiculo">Veículo</label>
+        <select id="veiculo">
+          <option value="">Selecione o veículo</option>
+        </select>
+      </div>
       <div class="col"><label for="data">Data</label><input id="data" type="date" readonly></div>
       <div class="col" style="max-width:120px"><label for="hora">Horário</label><input id="hora" type="time" readonly></div>
       <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
@@ -57,6 +67,7 @@
 
   <script>
   (function(){
+    // Preenchimento automático de data e hora
     const dataEl = document.getElementById('data');
     const horaEl = document.getElementById('hora');
     const today = new Date();
@@ -64,6 +75,188 @@
     dataEl.value = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
     horaEl.value = pad(today.getHours()) + ':' + pad(today.getMinutes());
 
+    // Lista de funcionários
+    const funcionarios = [
+      {codigo:"00225", nome:"WANTUIR BERTOLDO DA SILVA"},
+      {codigo:"01350", nome:"MARIA DA CONCEICAO ARANTES"},
+      {codigo:"01395", nome:"SANDRA APARECIDA VIEIRA SOUZA"},
+      {codigo:"01450", nome:"SERGIO HENRIQUE SIMOES"},
+      {codigo:"01462", nome:"ROSILENE ELIAS DE SOUZA"},
+      {codigo:"01519", nome:"DJALMA DE SOUSA PRATES"},
+      {codigo:"01532", nome:"EDINAR MELO DE SOUSA EDUARDO"},
+      {codigo:"01541", nome:"SILVIO AUGUSTO DE ASSIS"},
+      {codigo:"01542", nome:"PEDRO JOSE DA SILVA"},
+      {codigo:"01566", nome:"VALQUIRIA DO NASCIMENTO DA SILVA"},
+      {codigo:"01586", nome:"GENI ALVES XAVIER"},
+      {codigo:"01648", nome:"JULIANA MARIA DE RESENDE ADRIANO"},
+      {codigo:"01719", nome:"MARQUES CARLOS DE CASTRO"},
+      {codigo:"01759", nome:"MARCOS BATISTA PEREIRA"},
+      {codigo:"01767", nome:"VALDECIRO MELQUIADES DE OLIVEIRA"},
+      {codigo:"01776", nome:"RICARDO JUNIO BELIZARIO"},
+      {codigo:"01807", nome:"MICHELINE JOSE COUTINHO DO VALE"},
+      {codigo:"01811", nome:"JOSE ANTONIO DA SILVA"},
+      {codigo:"01818", nome:"ABGAIR DE JESUS DA SILVA"},
+      {codigo:"01844", nome:"JANE OLIVEIRA GUSMÃO"},
+      {codigo:"01849", nome:"JORDANIA APARECIDA LOPES"},
+      {codigo:"01853", nome:"SERGIO MAXIMIANO DA SILVA"},
+      {codigo:"01854", nome:"JOSE SOARES JUNIOR"},
+      {codigo:"01857", nome:"DANIELE CAMPOS DE ASSUNÇÃO"},
+      {codigo:"01886", nome:"NAIBIA MARIA SOUZA LIMA"},
+      {codigo:"01900", nome:"EDER DE ARAUJO SILVA"},
+      {codigo:"01906", nome:"JADER LUIS DA SILVA"},
+      {codigo:"01908", nome:"JESSICA SILVA RIBEIRO"},
+      {codigo:"01909", nome:"MARCELO AUGUSTO DE OLIVEIRA"},
+      {codigo:"01911", nome:"MARCELO APARECIDO LACERDA"},
+      {codigo:"01912", nome:"DIEGO JOSE RODRIGUES"},
+      {codigo:"01915", nome:"DIOGO DUQUE MARCELINO"},
+      {codigo:"01919", nome:"ISABELLA GONZAGA RIBEIRO"},
+      {codigo:"01924", nome:"APARECIDA MANOEL DA COSTA RODRIGUES"},
+      {codigo:"01925", nome:"RICARDO JUNIOR RIBEIRO MOURA"},
+      {codigo:"01927", nome:"RONIELE CORREA MARTINS"},
+      {codigo:"01928", nome:"LENILDO DOS SANTOS CHAVES"},
+      {codigo:"01935", nome:"RILDO CANDIDO"},
+      {codigo:"01937", nome:"EDVALDO VIEIRA DA SILVA"},
+      {codigo:"01944", nome:"ADEONES PAULO DA SILVA"},
+      {codigo:"01945", nome:"FERNANDA TEIXEIRA COUTO"},
+      {codigo:"01946", nome:"PERPÉTUA APARECIDA MARÇAL"},
+      {codigo:"01955", nome:"DANIEL JUNIO MARÇAL"},
+      {codigo:"01957", nome:"ROGERIO EDUARDO OLIVEIRA"},
+      {codigo:"01962", nome:"SIRLEIA REGINA DE FARIA SILVA"},
+      {codigo:"01965", nome:"HENRIQUE MAGNO SANTOS ALMEIDA"},
+      {codigo:"01967", nome:"IGOR APARECIDO GONZAGA"},
+      {codigo:"01969", nome:"JULIANO UMBERTO DE SALES SILVA"},
+      {codigo:"01970", nome:"JEANCARLOS JUNIOR DA SILVA"},
+      {codigo:"01971", nome:"MONICA GONÇALVES COSTA"},
+      {codigo:"01973", nome:"DAIANE LIMA NOGUEIRA"},
+      {codigo:"01977", nome:"ISILEI DE FATIMA SILVA"},
+      {codigo:"01979", nome:"CARLOS ALBERTO MARRERO MEDINA"},
+      {codigo:"01981", nome:"GABRIEL DE PAULA MORAIS"},
+      {codigo:"01982", nome:"CLEONE NASCIMENTO RODRIGUES"},
+      {codigo:"01983", nome:"SANDRA APARECIDA BORGES"},
+      {codigo:"01984", nome:"RENAN PAULINO ALVES GUIMARAES"},
+      {codigo:"01987", nome:"VAGNER DOMINGOS DE MORAES"},
+      {codigo:"01988", nome:"REINALDO FRANCISCO LOPES"},
+      {codigo:"01989", nome:"MARIANA APARECIDA NUNES DE MELO"},
+      {codigo:"01990", nome:"LUIS ANTONIO LOPES VELOSO"},
+      {codigo:"01991", nome:"NATALIA MARCIANA DE OLIVEIRA SOUZA"},
+      {codigo:"01992", nome:"DOUGLAS TEIXEIRA DOS SANTOS"},
+      {codigo:"01993", nome:"BRUNO HENRIQUE MORAIS FERREIRA"},
+      {codigo:"01994", nome:"MIRELLE DA SILVA RIBEIRO"},
+      {codigo:"01996", nome:"HEITOR EUSTAQUIO ALVES"},
+      {codigo:"01997", nome:"DAISIO APARECIDO OLIVEIRA"},
+      {codigo:"01998", nome:"RHAONNI MEGARON QUEROBINO"},
+      {codigo:"01999", nome:"GEOVANE DO AMARAL GOMES"},
+      {codigo:"02000", nome:"WILLIAN DOS SANTOS EVANGELINO"},
+      {codigo:"02001", nome:"FABIANO GERALDO MARTINS"},
+      {codigo:"02002", nome:"EDER LUIS DUQUE"},
+      {codigo:"02003", nome:"JOÃO VICTOR SANTOS"},
+      {codigo:"02004", nome:"RODRIGO SOUZA AIRES"},
+      {codigo:"02005", nome:"CRISTINA LOPES GOMES"},
+      {codigo:"02006", nome:"JOSE MARIA DA COSTA"},
+      {codigo:"02007", nome:"RAMON AUGUSTO DA SILVA COSTA"},
+      {codigo:"02008", nome:"GABRIEL WHAGNOM NOGUEIRA LIMA"},
+      {codigo:"02009", nome:"VANDER DE PAULA CANDIDO"},
+      {codigo:"02010", nome:"MARDEN ALVES BATISTA"},
+      {codigo:"02011", nome:"ANDER APARECIDO DA SILVA"},
+      {codigo:"02012", nome:"EDEILSON ALVE PEREIRA"},
+      {codigo:"02013", nome:"ISAC LIRIO LUIZ"},
+      {codigo:"02014", nome:"PAULO HENRIQUE RODRIGUES DA SILVA"},
+      {codigo:"02015", nome:"ROGERIO HENRIQUE BRITO DO PRADO"},
+      {codigo:"02016", nome:"AGNALDO CRISPIM DA SILVA"},
+      {codigo:"02017", nome:"ANNA VITORIA TAVARES DA PAIXAO"},
+      {codigo:"02018", nome:"MAICON SANTOS LIMA"},
+      {codigo:"02019", nome:"JUNIOR WESLEY MESSIAS"},
+      {codigo:"02020", nome:"JUSCELINA GONÇALVES DE OLIVEIRA"},
+      {codigo:"02021", nome:"EBERSON DAVID DA SILVA LIMA"},
+      {codigo:"02022", nome:"GABRIELA MARTINS CALIXTO"},
+      {codigo:"02023", nome:"GEYCILAYNE TELES SANTOS"},
+      {codigo:"02024", nome:"JAQUELINE NAZARE ROMAO"},
+      {codigo:"02025", nome:"ANDRE LOPES SILVA"},
+      {codigo:"02026", nome:"WESLIAN XUXA SILVIA MELINDA SOARES DE PONTES"},
+      {codigo:"02027", nome:"FLAVIA ALMEIDA ALVES SAMPAIO"},
+      {codigo:"02028", nome:"BRUNO DOS REIS SOUSA"},
+      {codigo:"02029", nome:"VALDER LEOPOLDINO OLIVEIRA MACHADO"},
+      {codigo:"02030", nome:"AILAN ARNALDO VELOSO"},
+      {codigo:"02031", nome:"IRANDI ROSA BRITO"},
+      {codigo:"02032", nome:"EUGENIO FONSECA DA COSTA DIAS"},
+      {codigo:"02033", nome:"TIAGO ALEXANDRE DA COSTA"},
+      {codigo:"02034", nome:"PAULO HENRIQUE BRITO"},
+      {codigo:"02035", nome:"ANDREA APARECIDA TOME DA SILVA"},
+      {codigo:"80021", nome:"RINALDO CESAR PEREIRA"},
+      {codigo:"80060", nome:"POLIANA OLIVEIRA"},
+      {codigo:"80065", nome:"JOYCE RAFAELA LOPES DA SILVA"},
+      {codigo:"80096", nome:"AILTON RODRIGO COUTINHO"},
+      {codigo:"80101", nome:"TIAGO LEONE RAMOS DA SILVA"},
+      {codigo:"80116", nome:"GUSTAVO TEIXEIRA DA SILVA"},
+      {codigo:"80119", nome:"JOSE WALTER DE OLIVEIRA"},
+      {codigo:"80139", nome:"VANDERLEI BORGES"},
+      {codigo:"80150", nome:"BRUNA DA CUNHA ALVES"},
+      {codigo:"80170", nome:"RODOLFO CARDOSO TEIXEIRA"},
+      {codigo:"80175", nome:"REINALDO DOS SANTOS VALADÃO"},
+      {codigo:"80177", nome:"MAURICIO JOSE DO COUTO"},
+      {codigo:"80184", nome:"LARICE EDUARDA MARTINS"},
+      {codigo:"80188", nome:"JOÃO VITOR ARRUDA"},
+      {codigo:"80208", nome:"ELIAS PEGO"},
+      {codigo:"80215", nome:"JOÃO PEDRO ROCHA DOMINGOS"},
+      {codigo:"80216", nome:"BRENO CALACIO DOS REIS"},
+      {codigo:"80219", nome:"JORDANYA ALVES PEREIRA SANTOS"},
+      {codigo:"80221", nome:"JULIA FERNANDES DA SILVA"},
+      {codigo:"80222", nome:"TIAGO SILVA DE OLIVEIRA"},
+      {codigo:"80224", nome:"JOSE CARLOS RAMOS RODRIGUES"},
+      {codigo:"80225", nome:"RICARDO AUGUSTO DOS SANTOS"},
+      {codigo:"80226", nome:"VIVIANE DE FIGUEIREDO TEIXEIRA"},
+      {codigo:"80227", nome:"BRUNO HENRIK GOMES SILVA"},
+      {codigo:"80228", nome:"HEITOR FERREIRA ARAUJO"},
+      {codigo:"80229", nome:"BEATRIZ ESTELA ELIAS DA SILVA"},
+      {codigo:"80230", nome:"DAIANY MINUCCI GARCIA"},
+      {codigo:"80231", nome:"LUIS ANTONIO LOPES VELOSO"},
+      {codigo:"80232", nome:"ROGERIO EDUARDO OLIVEIRA"},
+      {codigo:"80233", nome:"JEFFERSON RODRIGUES SOARES"},
+      {codigo:"80234", nome:"CELIO GERALDO DE SOUZA"},
+      {codigo:"80235", nome:"ELIAS TIBURCIO DE SOUZA"},
+      {codigo:"80236", nome:"ADRIANO PERCILIO DA SILVA"},
+      {codigo:"80237", nome:"IAN VICTOR MOREIRA GOMES"},
+      {codigo:"80238", nome:"ERICK HENRIQUE DE ALMEIDA"},
+      {codigo:"80239", nome:"CARLOS AUGUSTO DA COSTA"},
+      {codigo:"80240", nome:"GILSON GERALDO MINUCCI GARCIA SILVA"},
+      {codigo:"90001", nome:"GENTIL JOSÉ DE OLIVEIRA"},
+      {codigo:"91002", nome:"LIVIA MENEZES OLIVEIRA"},
+      {codigo:"91003", nome:"NICOMEDES AUGUSTO DE OLEIVEIRA"}
+    ];
+
+    const selectFuncionario = document.getElementById('matricula');
+    funcionarios.forEach(f => {
+      const option = document.createElement('option');
+      option.value = f.codigo;
+      option.textContent = `${f.codigo} - ${f.nome}`;
+      selectFuncionario.appendChild(option);
+    });
+
+// Lista de veículos
+const veiculos = [
+  {codigo:"CAM04", descricao:"F-1000 SS 1993 - BIS-6668"},
+  {codigo:"CAM05", descricao:"STRADA TREKING CD 2012 - OMC-0835"},
+  {codigo:"CAM11", descricao:"SAVEIRO TROPPER 2012 - HNB-8162"},
+  {codigo:"CAM12", descricao:"MONTANA LS 2013 - BRANCA - OQV-3D95"},
+  {codigo:"CAP01", descricao:"CAMINHÃO ASPIRADOR DE PO INDUSTRIAL - HQG-2B99"},
+  {codigo:"CAR01", descricao:"UNO FIRE 2006 - GSZ-1347"},
+  {codigo:"CAR07", descricao:"FIAT/MOBI - QWY-4310"},
+  {codigo:"CAR11", descricao:"MONTANA 2017 - PRATA - PYC-9B75"},
+  {codigo:"CAR12", descricao:"PALIO FIRE WAY -FIAT - 2015 - BRANCA - PWU-2G17"},
+  {codigo:"CAR13", descricao:"FIORINO - SYB-6B40"},
+  {codigo:"CAR14", descricao:"FIORINO - SYB-5J50"},
+  {codigo:"CAR15", descricao:"ARGO DRI 1.0 FLEX - TEH-9I88"}
+];
+
+const selectVeiculo = document.getElementById('veiculo');
+veiculos.forEach(v => {
+  const option = document.createElement('option');
+  option.value = v.codigo;
+  option.textContent = `${v.codigo} - ${v.descricao}`;
+  selectVeiculo.appendChild(option);
+});
+
+    // Itens do checklist
     const itens = [
       'Condição geral','Condições dos pneus e rodas','Água do radiador','Óleo do motor','Tanque de combustível','Extintor de incêndio',
       'Luzes e parte elétrica em geral','Buzina','Freios em geral','Bandeirola','Triângulo / macaco / chave roda',
@@ -157,7 +350,7 @@
       report.innerHTML = `
         <h2>Check-List Diário — Veículos Leves</h2>
         <div><strong>Data:</strong> ${dados.data || '-'} &nbsp;&nbsp; <strong>Horário:</strong> ${dados.hora || '-'}<br>
-        <strong>Nº cadastro:</strong> ${dados.matricula || '-'}<br>
+        <strong>Funcionário:</strong> ${dados.matricula || '-'}<br>
         <strong>Veículo:</strong> ${dados.veiculo || '-'}<br>
         <strong>Hodômetro:</strong> ${dados.hodometro || '-'}</div>
         <hr style="margin:10px 0;">
@@ -205,6 +398,7 @@
     function gerarExcel(){
       const dados = coletarDados();
       const matricula = document.getElementById('matricula').value.trim();
+      const veiculo = document.getElementById('veiculo').value.trim();
       const nomeFuncionario = limparNomeArquivo(matricula || 'sem_nome');
       const dataArquivo = `${dataEl.value}-${horaEl.value.replace(':','-')}`;
       const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
@@ -212,8 +406,8 @@
       const linhas = dados.map(it => ({
         Data: new Date(dataEl.value).toLocaleDateString('pt-BR'),
         Horario: horaEl.value,
-        Matricula: matricula,
-        Veiculo: document.getElementById('veiculo').value.trim(),
+        Funcionario: matricula,
+        Veiculo: veiculo,
         Hodometro: document.getElementById('hodometro').value.trim(),
         Numero: it.num,
         Item: it.title,
@@ -237,7 +431,8 @@
 
     document.getElementById('btnGerar').onclick = gerarPDFsalvar;
     document.getElementById('btnExcel').onclick = gerarExcel;
-    document.getElementById('btnInstrucoes').onclick = ()=>alert('Após gerar o PDF ou Excel, abra o WhatsApp e anexe o arquivo salvo na pasta Downloads.');
+    document.getElementById('btnInstrucoes').onclick = ()=>alert('Após gerar o PDF ou Excel, abra o WhatsApp e envie o arquivo como anexo para o contato desejado.');
+
   })();
   </script>
 </body>
