@@ -1,3 +1,4 @@
+
 <!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
@@ -152,9 +153,9 @@ const tblBody = document.querySelector('#tblEquipamentos tbody');
 
 function criarSelectArea(tagPrefix) {
   const select = document.createElement('select');
-  const opcoesEMP = ["ARCOS","CAL","HIDRATAÇÃO","CARBONATO","DRS - MANUTENÇÃO","RESERVA"];
-  const opcoesMC = ["CAL","CARBONATO","DRS - MANUTENÇÃO","RESERVA"];
-  const opcoesPC = ["BIOMASSA","CAL","COQUE","BRITAGEM - MANUTENÇÃO","RESERVA"];
+  const opcoesEMP = ["ARCOS","CAL","HIDRATAÇÃO","CARBONATO","DRS","MANUTENÇÃO","RESERVA"];
+  const opcoesMC = ["CAL","CARBONATO","DRS","MANUTENÇÃO","RESERVA"];
+  const opcoesPC = ["BIOMASSA","CAL","COQUE","BRITAGEM","MANUTENÇÃO","RESERVA"];
   const lista = tagPrefix.startsWith("EMP") ? opcoesEMP : tagPrefix.startsWith("MC") ? opcoesMC : opcoesPC;
 
   const vazio = document.createElement('option');
