@@ -332,6 +332,7 @@
       <button id="btnGerarPDF" class="btn">Gerar PDF</button>
       <button id="btnLimpar" class="btn gray">Limpar</button>
 <button id="btnExcelRDS" class="btn gray">Gerar Excel</button>
+<button id="btnServidor" class="btn gray">Enviar para o Servidor</button>
       <div class="muted">Arquivo: <strong>RDS_SERVICO_DD-MM-AAAA_HH-MM.pdf</strong></div>
     </div>
   </div>
@@ -696,9 +697,125 @@ const nome = (entrada || saida) ? (selectNome ? selectNome.value.trim() : '') : 
   XLSX.writeFile(wb, nomeArquivo);
 
   alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
+// --- ENVIAR PARA O SERVIDOR (JSONBin) ---
+async function enviarParaServidorRDS(){
+  // coletar dados principais
+  const dataIso = $('rds_data').value; // yyyy-mm-dd
+  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
+  const horaDoc = $('rds_hora_doc').value;
+  const contratante = $('rds_contratante').value;
+  const servico = $('rds_servico').value;
+  const fabrica = $('rds_fabrica').value;
+  const horarioTrabalho = $('rds_horario_trabalho').value;
+  const tema = $('rds_tema').value;
+  const horarioDDS = $('rds_horario_dds').value;
+
+  // coletar linhas da tabela (somente linhas com entrada/saída/obs)
+  const tbody = document.querySelector('#tblFuncionarios tbody');
+  const linhas = Array.from(tbody.querySelectorAll('tr')).map(tr => {
+    const cells = tr.querySelectorAll('td');
+    const inputCodigo = cells[0].querySelector('input');
+    const selectNome = cells[1].querySelector('select');
+    const entrada = cells[2].querySelector('input').value.trim();
+    const saida = cells[3].querySelector('input').value.trim();
+    const observacao = cells[4].querySelector('input').value.trim();
+
+    return {
+      Codigo: inputCodigo ? inputCodigo.value.trim() : '',
+      Nome: selectNome ? selectNome.value.trim() : '',
+      Entrada: entrada,
+      Saida: saida,
+      Observacao: observacao
+    };
+  }).filter(l => l.Entrada || l.Saida || l.Observacao);
+
+  if(linhas.length === 0){
+    if(!confirm('Não há nenhuma linha preenchida. Deseja enviar apenas os metadados (sem funcionários)?')) return;
+  }
+
+  // montar o array de objetos no mesmo formato do Excel
+  const dadosNovo = linhas.length > 0 ? linhas.map(l => ({
+    Data: data,
+    HoraDocumento: horaDoc,
+    Contratante: contratante,
+    Servico: servico,
+    Fabrica: fabrica,
+    HorarioTrabalho: horarioTrabalho,
+    TemaDDS: tema,
+    HorarioDDS: horarioDDS,
+    Codigo: l.Codigo,
+    Nome: l.Nome,
+    Entrada: l.Entrada,
+    Saida: l.Saida,
+    Observacao: l.Observacao
+  })) : [ // se não houver linhas, enviar apenas um registro com metadados
+    {
+      Data: data,
+      HoraDocumento: horaDoc,
+      Contratante: contratante,
+      Servico: servico,
+      Fabrica: fabrica,
+      HorarioTrabalho: horarioTrabalho,
+      TemaDDS: tema,
+      HorarioDDS: horarioDDS,
+      Codigo: '',
+      Nome: '',
+      Entrada: '',
+      Saida: '',
+      Observacao: ''
+    }
+  ];
+
+  try {
+    // GET dados existentes no bin (endpoint /latest)
+    const GET_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a/latest';
+    const PUT_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a';
+    const MASTER_KEY = '$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi';
+
+    const resGet = await fetch(GET_URL, {
+      method: 'GET',
+      headers: { 'X-Master-Key': MASTER_KEY }
+    });
+
+    let dadosExistentes = [];
+    if(resGet.ok){
+      const json = await resGet.json();
+      dadosExistentes = Array.isArray(json.record) ? json.record : [];
+    }
+
+    // concatena (adiciona no final)
+    const dadosAtualizados = [...dadosExistentes, ...dadosNovo];
+
+    // PUT para atualizar o bin
+    const resPut = await fetch(PUT_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': MASTER_KEY,
+        'X-Bin-Versioning': 'false'
+      },
+      body: JSON.stringify(dadosAtualizados)
+    });
+
+    if(resPut.ok){
+      alert('✅ Relatório enviado para o Servidor com sucesso!');
+    } else {
+      const texto = await resPut.text().catch(()=>resPut.statusText);
+      alert('❌ Erro ao atualizar o Servidor: ' + (resPut.statusText || texto));
+    }
+
+  } catch(err){
+    alert('❌ Erro na requisição: ' + err.message);
+  }
+}
+
+// vincular botão
+document.getElementById('btnServidor').onclick = enviarParaServidorRDS;
+
 }
 
 
 </script>
 </body>
 </html>
+
