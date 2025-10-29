@@ -56,6 +56,8 @@
           <option value="">Selecione o veículo</option>
         </select>
       </div>
+
+
       <div class="col"><label for="data">Data</label><input id="data" type="date" readonly></div>
       <div class="col" style="max-width:120px"><label for="hora">Horário</label><input id="hora" type="time" readonly></div>
       <div class="col" style="max-width:160px"><label for="hodometro">Hodômetro (km)</label><input id="hodometro" type="text" placeholder="12345"></div>
@@ -64,7 +66,8 @@
     <div class="items" id="items"></div>
 
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn" id="btnExcel">Gerar Excel</button>
+     <button class="btn btn-gray" id="btnServidor">Enviar para o Servidor</button>
+ <button class="btn" id="btnExcel">Gerar Excel</button>
       <button class="btn btn-gray" id="btnGerar">Gerar PDF</button>
       <button class="btn btn-gray" id="btnInstrucoes">Como enviar pelo WhatsApp</button>
     </div>
@@ -162,7 +165,7 @@ veiculos.forEach(v => {
       'Retrovisor / janelas / para-brisa e vidros em geral','Cinto de segurança','Sinalizações','Giroflex','Documentação do Veículo'
     ];
 
-    const descs = [
+ const descs = [
       'Sem vazamentos, sem peças ou partes soltas, bancos em condições de assentar, portas fechando, direção alinhada, etc.',
       'Calibrados, sem lesões, rasgos e trincas, aparência normal, bom estado conservação, step preso ao suporte. Rodas com todos os parafusos',
       'Sempre completo de acordo com o nível indicado.',
@@ -331,11 +334,59 @@ veiculos.forEach(v => {
     document.getElementById('btnGerar').onclick = gerarPDFsalvar;
     document.getElementById('btnExcel').onclick = gerarExcel;
     document.getElementById('btnInstrucoes').onclick = ()=>alert('Após gerar o PDF ou Excel, abra o WhatsApp e envie o arquivo como anexo para o contato desejado.');
+ // Servidor
+    async function enviarParaServidor(){
+  const dadosNovo = coletarDados().map(it => ({
+    Data: new Date(dataEl.value).toLocaleDateString('pt-BR'),
+    Horario: horaEl.value,
+    Funcionario: document.getElementById('matricula').value.trim(),
+    Veiculo: document.getElementById('veiculo').value.trim(),
+    Hodometro: document.getElementById('hodometro').value.trim(),
+    Numero: it.num,
+    Item: it.title,
+    Descricao: it.desc,
+    Status: it.status,
+    Observacao: it.obs
+  }));
 
+  try {
+    const resGet = await fetch('https://api.jsonbin.io/v3/b/69023644ae596e708f35f300/latest', {
+      method:'GET',
+      headers:{'X-Master-Key':'$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi'}
+    });
+
+    let dadosExistentes = [];
+    if(resGet.ok){
+      const json = await resGet.json();
+      dadosExistentes = Array.isArray(json.record) ? json.record : [];
+    }
+
+    const dadosAtualizados = [...dadosExistentes, ...dadosNovo];
+
+    const resPut = await fetch('https://api.jsonbin.io/v3/b/69023644ae596e708f35f300',{
+      method:'PUT',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Master-Key':'$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi',
+        'X-Bin-Versioning':'false'
+      },
+      body:JSON.stringify(dadosAtualizados)
+    });
+
+    if(resPut.ok){
+      alert('✅ Checklist enviado para o Servidor com sucesso!');
+    } else {
+      alert('❌ Erro ao atualizar o Servidor: '+resPut.statusText);
+    }
+
+  } catch(err){
+    alert('❌ Erro na requisição: '+err.message);
+  }
+}
+
+document.getElementById('btnServidor').onclick = enviarParaServidor;
   })();
   </script>
 </body>
 </html>
-
-
 
