@@ -229,8 +229,8 @@
 
     pdf.setFontSize(14);
     pdf.text(`Check-List Diário — Veículos Leves`, margin, yOffset); yOffset += lineHeight + 4;
-    pdf.setFontSize(11);
-    pdf.text(`Data: ${dados.data || '-'}   Horário: ${dados.hora || '-'}`, margin, yOffset); yOffset += lineHeight;
+    pdf.setFontSize(11);  
+    pdf.text(`Data: ${dados.data.split('-').reverse().join('/')}   Horário: ${dados.hora || '-'}`, margin, yOffset); yOffset += lineHeight;
     pdf.text(`Funcionário: ${nomeFuncionarioCompleto || '-'}`, margin, yOffset); yOffset += lineHeight;
     pdf.text(`Veículo: ${dados.veiculo || '-'}`, margin, yOffset); yOffset += lineHeight;
     pdf.text(`Hodômetro: ${dados.hodometro || '-'}`, margin, yOffset); yOffset += lineHeight + 8;
@@ -373,6 +373,7 @@
 </script>
 </body>
 </html>
+
 
 
 
