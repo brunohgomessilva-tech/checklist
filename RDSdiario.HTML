@@ -637,63 +637,96 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
   while(heightLeft>0){pos-=pdf.internal.pageSize.height;pdf.addPage();pdf.addImage(img,'PNG',0,pos,w,h);heightLeft-=pdf.internal.pageSize.height;}
   pdf.save(`RDS_${$('rds_servico').value}_${dataFormatada}.pdf`);
   document.body.removeChild(wrapper);
-};// 🟢 FUNÇÃO GERAR EXCEL
-$('btnExcelRDS').addEventListener('click', gerarExcelRDS);
+};// 🟢 FUNÇÃO GERAR EXCEL CORRIGIDA
+document.getElementById('btnExcelRDS').addEventListener('click', function() {
+    gerarExcelParaDownload();
+});
 
-let ultimoExcelBlob = null; // guarda o último Excel gerado
+let ultimoExcelBlob = null;
 
-function gerarExcelRDS(retornarBlob = false) {
-  const data = $('rds_data').value;
-  const hora = $('rds_hora_doc').value;
-  const contratante = $('rds_contratante').value;
-  const servico = $('rds_servico').value;
-  const fabrica = $('rds_fabrica').value;
-  const horarioTrabalho = $('rds_horario_trabalho').value;
-  const tema = $('rds_tema').value;
-  const horarioDDS = $('rds_horario_dds').value;
+// FUNÇÃO SEPARADA PARA BAIXAR EXCEL
+function gerarExcelParaDownload() {
+    const blob = gerarExcelBase();
+    if (blob) {
+        // Converte o blob de volta para arquivo e faz download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const data = $('rds_data').value;
+        const servico = $('rds_servico').value;
+        const nomeArquivo = `RDS_${servico.replace(/[^a-z0-9]/gi,'_')}_${data}.xlsx`;
+        a.download = nomeArquivo;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
+    }
+}
 
-  const tbody = $('tblFuncionarios').querySelector('tbody');
+// FUNÇÃO BASE QUE GERA O EXCEL (usada por ambos)
+function gerarExcelBase() {
+    try {
+        const data = $('rds_data').value;
+        const hora = $('rds_hora_doc').value;
+        const contratante = $('rds_contratante').value;
+        const servico = $('rds_servico').value;
+        const fabrica = $('rds_fabrica').value;
+        const horarioTrabalho = $('rds_horario_trabalho').value;
+        const tema = $('rds_tema').value;
+        const horarioDDS = $('rds_horario_dds').value;
 
-  const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
-    const cells = tr.querySelectorAll('td');
-    const entrada = cells[2].querySelector('input').value.trim();
-    const saida = cells[3].querySelector('input').value.trim();
-    const observacao = cells[4].querySelector('input').value.trim();
-    const inputCodigo = cells[0].querySelector('input');
-    const selectNome = cells[1].querySelector('select');
-    const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
-    const nome = (entrada || saida) ? (selectNome?.options[selectNome.selectedIndex]?.text?.trim() || '') : '';
+        const tbody = $('tblFuncionarios').querySelector('tbody');
 
-    return { Codigo: codigo, Nome: nome, Entrada: entrada, Saida: saida, Observacao: observacao };
-  }).filter(f => f.Entrada || f.Saida || f.Observacao);
+        const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
+            const cells = tr.querySelectorAll('td');
+            const entrada = cells[2].querySelector('input').value.trim();
+            const saida = cells[3].querySelector('input').value.trim();
+            const observacao = cells[4].querySelector('input').value.trim();
+            const inputCodigo = cells[0].querySelector('input');
+            const selectNome = cells[1].querySelector('select');
+            const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
+            const nome = (entrada || saida) ? (selectNome?.options[selectNome.selectedIndex]?.text?.trim() || '') : '';
 
-  const linhas = linhasFunc.map(f => ({
-    Data: data.split('-').reverse().join('/'),
-    Hora: hora,
-    Contratante: contratante,
-    Servico: servico,
-    Fabrica: fabrica,
-    HorarioTrabalho: horarioTrabalho,
-    TemaDDS: tema,
-    HorarioDDS: horarioDDS,
-    Codigo: f.Codigo,
-    Nome: f.Nome,
-    Entrada: f.Entrada,
-    Saida: f.Saida,
-    Observacao: f.Observacao
-  }));
+            return { Codigo: codigo, Nome: nome, Entrada: entrada, Saida: saida, Observacao: observacao };
+        }).filter(f => f.Entrada || f.Saida || f.Observacao);
 
-  const nomeArquivo = `RDS_${servico.replace(/[^a-z0-9]/gi,'_')}_${data}_${hora.replace(':','-')}.xlsx`;
-  const ws = XLSX.utils.json_to_sheet(linhas);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'RDS');
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  ultimoExcelBlob = new Blob([wbout], { type: 'application/octet-stream' });
+        if (linhasFunc.length === 0) {
+            alert('⚠️ Nenhum dado de funcionário preenchido!');
+            return null;
+        }
 
-  if (retornarBlob) return ultimoExcelBlob; // usado para envio automático
+        const linhas = linhasFunc.map(f => ({
+            Data: data.split('-').reverse().join('/'),
+            Hora: hora,
+            Contratante: contratante,
+            Servico: servico,
+            Fabrica: fabrica,
+            HorarioTrabalho: horarioTrabalho,
+            TemaDDS: tema,
+            HorarioDDS: horarioDDS,
+            Codigo: f.Codigo,
+            Nome: f.Nome,
+            Entrada: f.Entrada,
+            Saida: f.Saida,
+            Observacao: f.Observacao
+        }));
 
-  XLSX.writeFile(wb, nomeArquivo);
-  alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
+        const ws = XLSX.utils.json_to_sheet(linhas);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'RDS');
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        ultimoExcelBlob = new Blob([wbout], { type: 'application/octet-stream' });
+
+        return ultimoExcelBlob;
+        
+    } catch (error) {
+        alert('❌ Erro ao gerar Excel: ' + error.message);
+        return null;
+    }
 }
 
 // ======================================================
@@ -773,10 +806,12 @@ window.addEventListener('load', () => {
 // ======================================================
 async function enviarParaServidorRDS() {
   // 🔹 Garante que sempre gere Excel antes de enviar
-  if (!ultimoExcelBlob) gerarExcelRDS(true);
+  if (!ultimoExcelBlob) {
+    ultimoExcelBlob = gerarExcelBase(); // ← ASSIM FICA (USA A NOVA FUNÇÃO)
+  }
 
-  if (!navigator.onLine) {
-    salvarLocalmenteRDS();
+  if (!ultimoExcelBlob) {
+    alert('❌ Não foi possível gerar o Excel para envio');
     return;
   }
 
@@ -867,6 +902,15 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 
