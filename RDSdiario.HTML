@@ -328,11 +328,13 @@
       <tbody></tbody>
     </table>
 
-    <div class="actions">
-      <button id="btnGerarPDF" class="btn">Gerar PDF</button>
+    <div class="actions"> 
+<button id="btnSalvarLocal" class="btn ">Salvar Localmente</button>
+<button id="btnExcelRDS" class="btn gray">Gerar Excel</button> 
+<button id="btnServidor" class="btn gray">Enviar para o Servidor</button>    
+ <button id="btnGerarPDF" class="btn gray">Gerar PDF</button>
       <button id="btnLimpar" class="btn gray">Limpar</button>
-<button id="btnExcelRDS" class="btn gray">Gerar Excel</button>
-<button id="btnServidor" class="btn gray">Enviar para o Servidor</button>
+
       <div class="muted">Arquivo: <strong>RDS_SERVICO_DD-MM-AAAA_HH-MM.pdf</strong></div>
     </div>
   </div>
@@ -638,7 +640,9 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
 };// 🟢 FUNÇÃO GERAR EXCEL
 $('btnExcelRDS').addEventListener('click', gerarExcelRDS);
 
-function gerarExcelRDS() {
+let ultimoExcelBlob = null; // guarda o último Excel gerado
+
+function gerarExcelRDS(retornarBlob = false) {
   const data = $('rds_data').value;
   const hora = $('rds_hora_doc').value;
   const contratante = $('rds_contratante').value;
@@ -652,28 +656,16 @@ function gerarExcelRDS() {
 
   const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
     const cells = tr.querySelectorAll('td');
-
     const entrada = cells[2].querySelector('input').value.trim();
     const saida = cells[3].querySelector('input').value.trim();
     const observacao = cells[4].querySelector('input').value.trim();
+    const inputCodigo = cells[0].querySelector('input');
+    const selectNome = cells[1].querySelector('select');
+    const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
+    const nome = (entrada || saida) ? (selectNome?.options[selectNome.selectedIndex]?.text?.trim() || '') : '';
 
-    // Código e Nome aparecem apenas se Entrada ou Saída preenchido
-    // pegar código do input e nome do select
-const inputCodigo = cells[0].querySelector('input');
-const selectNome = cells[1].querySelector('select');
-
-const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
-const nome = (entrada || saida) ? (selectNome ? selectNome.value.trim() : '') : '';
-
-
-    return {
-      Codigo: codigo,
-      Nome: nome,
-      Entrada: entrada,
-      Saida: saida,
-      Observacao: observacao
-    };
-  }).filter(f => f.Entrada || f.Saida || f.Observacao); // remove linhas totalmente vazias
+    return { Codigo: codigo, Nome: nome, Entrada: entrada, Saida: saida, Observacao: observacao };
+  }).filter(f => f.Entrada || f.Saida || f.Observacao);
 
   const linhas = linhasFunc.map(f => ({
     Data: data.split('-').reverse().join('/'),
@@ -684,111 +676,141 @@ const nome = (entrada || saida) ? (selectNome ? selectNome.value.trim() : '') : 
     HorarioTrabalho: horarioTrabalho,
     TemaDDS: tema,
     HorarioDDS: horarioDDS,
-    Codigo: f.Codigo,  // Coluna I → Código
-    Nome: f.Nome,      // Coluna J → Nome
+    Codigo: f.Codigo,
+    Nome: f.Nome,
     Entrada: f.Entrada,
     Saida: f.Saida,
     Observacao: f.Observacao
   }));
 
   const nomeArquivo = `RDS_${servico.replace(/[^a-z0-9]/gi,'_')}_${data}_${hora.replace(':','-')}.xlsx`;
-
   const ws = XLSX.utils.json_to_sheet(linhas);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'RDS');
-  XLSX.writeFile(wb, nomeArquivo);
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  ultimoExcelBlob = new Blob([wbout], { type: 'application/octet-stream' });
 
+  if (retornarBlob) return ultimoExcelBlob; // usado para envio automático
+
+  XLSX.writeFile(wb, nomeArquivo);
   alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
-// --- ENVIAR PARA O SERVIDOR (JSONBin) ---
-async function enviarParaServidorRDS(){
-  // coletar dados principais
-  const dataIso = $('rds_data').value; // yyyy-mm-dd
+}
+
+// ======================================================
+// Salvamento Local + Envio Offline (RDS)
+// ======================================================
+function salvarLocalmenteRDS() {
+  const dataIso = $('rds_data').value;
   const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
   const horaDoc = $('rds_hora_doc').value;
   const contratante = $('rds_contratante').value;
   const servico = $('rds_servico').value;
-  const fabrica = $('rds_fabrica').value;
   const horarioTrabalho = $('rds_horario_trabalho').value;
+  const fabrica = $('rds_fabrica').value;
   const tema = $('rds_tema').value;
   const horarioDDS = $('rds_horario_dds').value;
 
-  // coletar linhas da tabela (somente linhas com entrada/saída/obs)
-  const tbody = document.querySelector('#tblFuncionarios tbody');
-  const linhas = Array.from(tbody.querySelectorAll('tr')).map(tr => {
-    const cells = tr.querySelectorAll('td');
-    const inputCodigo = cells[0].querySelector('input');
-    const selectNome = cells[1].querySelector('select');
-    const entrada = cells[2].querySelector('input').value.trim();
-    const saida = cells[3].querySelector('input').value.trim();
-    const observacao = cells[4].querySelector('input').value.trim();
-
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
+    const i = r.querySelectorAll('input,select');
     return {
-      Codigo: inputCodigo ? inputCodigo.value.trim() : '',
-      Nome: selectNome ? selectNome.value.trim() : '',
-      Entrada: entrada,
-      Saida: saida,
-      Observacao: observacao
-    };
-  }).filter(l => l.Entrada || l.Saida || l.Observacao);
-
-  if(linhas.length === 0){
-    if(!confirm('Não há nenhuma linha preenchida. Deseja enviar apenas os metadados (sem funcionários)?')) return;
-  }
-
-  // montar o array de objetos no mesmo formato do Excel
-  const dadosNovo = linhas.length > 0 ? linhas.map(l => ({
-    Data: data,
-    HoraDocumento: horaDoc,
-    Contratante: contratante,
-    Servico: servico,
-    Fabrica: fabrica,
-    HorarioTrabalho: horarioTrabalho,
-    TemaDDS: tema,
-    HorarioDDS: horarioDDS,
-    Codigo: l.Codigo,
-    Nome: l.Nome,
-    Entrada: l.Entrada,
-    Saida: l.Saida,
-    Observacao: l.Observacao
-  })) : [ // se não houver linhas, enviar apenas um registro com metadados
-    {
       Data: data,
       HoraDocumento: horaDoc,
       Contratante: contratante,
       Servico: servico,
-      Fabrica: fabrica,
       HorarioTrabalho: horarioTrabalho,
+      Fabrica: fabrica,
       TemaDDS: tema,
       HorarioDDS: horarioDDS,
-      Codigo: '',
-      Nome: '',
-      Entrada: '',
-      Saida: '',
-      Observacao: ''
-    }
-  ];
+      Codigo: i[0].value,
+      Nome: i[1].value,
+      Entrada: i[2].value,
+      Saida: i[3].value,
+      Observacao: i[4].value
+    };
+  }).filter(l => l.Codigo || l.Nome || l.Entrada || l.Saida || l.Observacao);
+
+  localStorage.setItem('rds_offline_cache', JSON.stringify(linhas));
+  alert('💾 Dados salvos localmente! Serão enviados quando houver conexão.');
+}
+
+window.addEventListener('load', () => {
+  const cache = localStorage.getItem('rds_offline_cache');
+  if (cache) {
+    const linhas = JSON.parse(cache);
+    tblBody.innerHTML = "";
+    linhas.forEach(l => {
+      const tr = document.createElement('tr');
+      const select = criarSelectFuncionario(l.Nome || '');
+      tr.innerHTML = `
+        <td><input type="text" value="${l.Codigo || ''}" /></td>
+        <td></td>
+        <td><input type="text" value="${l.Entrada || ''}" /></td>
+        <td><input type="text" value="${l.Saida || ''}" /></td>
+        <td><input type="text" value="${l.Observacao || ''}" /></td>
+        <td><button class="remove-btn">Remover</button></td>
+      `;
+      tr.children[1].appendChild(select);
+      tr.querySelector('.remove-btn').onclick = () => tr.remove();
+      tblBody.appendChild(tr);
+    });
+    alert('📦 Dados locais carregados!');
+  }
+});
+
+// ======================================================
+// Enviar dados para o servidor (com fallback offline)
+// ======================================================
+async function enviarParaServidorRDS() {
+  // 🔹 Garante que sempre gere Excel antes de enviar
+  if (!ultimoExcelBlob) gerarExcelRDS(true);
+
+  if (!navigator.onLine) {
+    salvarLocalmenteRDS();
+    return;
+  }
+
+  const dataIso = $('rds_data').value;
+  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
+  const horaDoc = $('rds_hora_doc').value;
+  const contratante = $('rds_contratante').value;
+  const servico = $('rds_servico').value;
+  const horarioTrabalho = $('rds_horario_trabalho').value;
+  const fabrica = $('rds_fabrica').value;
+  const tema = $('rds_tema').value;
+  const horarioDDS = $('rds_horario_dds').value;
+
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
+    const i = r.querySelectorAll('input,select');
+    return {
+      Data: data,
+      HoraDocumento: horaDoc,
+      Contratante: contratante,
+      Servico: servico,
+      HorarioTrabalho: horarioTrabalho,
+      Fabrica: fabrica,
+      TemaDDS: tema,
+      HorarioDDS: horarioDDS,
+      Codigo: i[0].value,
+      Nome: i[1].value,
+      Entrada: i[2].value,
+      Saida: i[3].value,
+      Observacao: i[4].value
+    };
+  }).filter(l => l.Codigo || l.Nome || l.Entrada || l.Saida || l.Observacao);
 
   try {
-    // GET dados existentes no bin (endpoint /latest)
     const GET_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a/latest';
     const PUT_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a';
     const MASTER_KEY = '$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi';
 
-    const resGet = await fetch(GET_URL, {
-      method: 'GET',
-      headers: { 'X-Master-Key': MASTER_KEY }
-    });
-
+    const resGet = await fetch(GET_URL, { headers: { 'X-Master-Key': MASTER_KEY } });
     let dadosExistentes = [];
-    if(resGet.ok){
+    if (resGet.ok) {
       const json = await resGet.json();
       dadosExistentes = Array.isArray(json.record) ? json.record : [];
     }
 
-    // concatena (adiciona no final)
-    const dadosAtualizados = [...dadosExistentes, ...dadosNovo];
-
-    // PUT para atualizar o bin
+    const dadosAtualizados = [...dadosExistentes, ...linhas];
     const resPut = await fetch(PUT_URL, {
       method: 'PUT',
       headers: {
@@ -799,26 +821,43 @@ async function enviarParaServidorRDS(){
       body: JSON.stringify(dadosAtualizados)
     });
 
-    if(resPut.ok){
-      alert('✅ Relatório enviado para o Servidor com sucesso!');
+    if (resPut.ok) {
+      alert('✅ Dados enviados com sucesso!');
+      localStorage.removeItem('rds_offline_cache');
     } else {
-      const texto = await resPut.text().catch(()=>resPut.statusText);
-      alert('❌ Erro ao atualizar o Servidor: ' + (resPut.statusText || texto));
+      alert('❌ Erro ao enviar, dados mantidos localmente.');
+      salvarLocalmenteRDS();
     }
 
-  } catch(err){
-    alert('❌ Erro na requisição: ' + err.message);
+  } catch (err) {
+    alert('❌ Erro: ' + err.message + '\nDados salvos localmente.');
+    salvarLocalmenteRDS();
   }
 }
 
-// vincular botão
+// ======================================================
+// Eventos de botões e reconexão automática
+// ======================================================
+document.getElementById('btnSalvarLocal').onclick = salvarLocalmenteRDS;
 document.getElementById('btnServidor').onclick = enviarParaServidorRDS;
 
-}
+// 🔹 Ao restaurar conexão → gera Excel e envia
+window.addEventListener('online', async () => {
+  const cache = localStorage.getItem('rds_offline_cache');
+  if (cache) {
+    gerarExcelRDS(true);
+    alert('🌐 Conexão restaurada! Enviando dados pendentes...');
+    await enviarParaServidorRDS();
+  }
+});
+
 
 
 </script>
 </body>
 </html>
+
+
+
 
 
