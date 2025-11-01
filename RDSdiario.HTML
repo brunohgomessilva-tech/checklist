@@ -697,30 +697,23 @@ function gerarExcelRDS(retornarBlob = false) {
 }
 
 // ======================================================
-// Salvamento Local + Envio Offline (RDS)
+// Salvamento Local + Restauração (RDS)
 // ======================================================
 function salvarLocalmenteRDS() {
-  const dataIso = $('rds_data').value;
-  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
-  const horaDoc = $('rds_hora_doc').value;
-  const contratante = $('rds_contratante').value;
-  const servico = $('rds_servico').value;
-  const horarioTrabalho = $('rds_horario_trabalho').value;
-  const fabrica = $('rds_fabrica').value;
-  const tema = $('rds_tema').value;
-  const horarioDDS = $('rds_horario_dds').value;
+  const cabecalho = {
+    data: $('rds_data').value,
+    horaDoc: $('rds_hora_doc').value,
+    contratante: $('rds_contratante').value,
+    servico: $('rds_servico').value,
+    horarioTrabalho: $('rds_horario_trabalho').value,
+    fabrica: $('rds_fabrica').value,
+    tema: $('rds_tema').value,
+    horarioDDS: $('rds_horario_dds').value
+  };
 
   const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
     const i = r.querySelectorAll('input,select');
     return {
-      Data: data,
-      HoraDocumento: horaDoc,
-      Contratante: contratante,
-      Servico: servico,
-      HorarioTrabalho: horarioTrabalho,
-      Fabrica: fabrica,
-      TemaDDS: tema,
-      HorarioDDS: horarioDDS,
       Codigo: i[0].value,
       Nome: i[1].value,
       Entrada: i[2].value,
@@ -729,31 +722,49 @@ function salvarLocalmenteRDS() {
     };
   }).filter(l => l.Codigo || l.Nome || l.Entrada || l.Saida || l.Observacao);
 
-  localStorage.setItem('rds_offline_cache', JSON.stringify(linhas));
+  const pacote = { cabecalho, linhas };
+
+  localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
   alert('💾 Dados salvos localmente! Serão enviados quando houver conexão.');
 }
 
 window.addEventListener('load', () => {
   const cache = localStorage.getItem('rds_offline_cache');
   if (cache) {
-    const linhas = JSON.parse(cache);
-    tblBody.innerHTML = "";
-    linhas.forEach(l => {
-      const tr = document.createElement('tr');
-      const select = criarSelectFuncionario(l.Nome || '');
-      tr.innerHTML = `
-        <td><input type="text" value="${l.Codigo || ''}" /></td>
-        <td></td>
-        <td><input type="text" value="${l.Entrada || ''}" /></td>
-        <td><input type="text" value="${l.Saida || ''}" /></td>
-        <td><input type="text" value="${l.Observacao || ''}" /></td>
-        <td><button class="remove-btn">Remover</button></td>
-      `;
-      tr.children[1].appendChild(select);
-      tr.querySelector('.remove-btn').onclick = () => tr.remove();
-      tblBody.appendChild(tr);
-    });
-    alert('📦 Dados locais carregados!');
+    const { cabecalho, linhas } = JSON.parse(cache);
+
+    // restaura cabeçalho
+    if (cabecalho) {
+      $('rds_data').value = cabecalho.data || '';
+      $('rds_hora_doc').value = cabecalho.horaDoc || '';
+      $('rds_contratante').value = cabecalho.contratante || '';
+      $('rds_servico').value = cabecalho.servico || '';
+      $('rds_horario_trabalho').value = cabecalho.horarioTrabalho || '';
+      $('rds_fabrica').value = cabecalho.fabrica || '';
+      $('rds_tema').value = cabecalho.tema || '';
+      $('rds_horario_dds').value = cabecalho.horarioDDS || '';
+    }
+
+    // restaura tabela
+    if (linhas?.length) {
+      tblBody.innerHTML = "";
+      linhas.forEach(l => {
+        const tr = document.createElement('tr');
+        const select = criarSelectFuncionario(l.Nome || '');
+        tr.innerHTML = `
+          <td><input type="text" value="${l.Codigo || ''}" /></td>
+          <td></td>
+          <td><input type="text" value="${l.Entrada || ''}" /></td>
+          <td><input type="text" value="${l.Saida || ''}" /></td>
+          <td><input type="text" value="${l.Observacao || ''}" /></td>
+          <td><button class="remove-btn">Remover</button></td>
+        `;
+        tr.children[1].appendChild(select);
+        tr.querySelector('.remove-btn').onclick = () => tr.remove();
+        tblBody.appendChild(tr);
+      });
+      alert('📦 Dados locais carregados!');
+    }
   }
 });
 
@@ -856,6 +867,8 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
+
 
 
 
