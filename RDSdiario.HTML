@@ -758,7 +758,7 @@ function salvarLocalmenteRDS() {
   const pacote = { cabecalho, linhas };
 
   localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
-  alert('💾 Dados salvos localmente! Serão enviados quando houver conexão.');
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo, adicionou ou mudou alguma coisa salve de novo, mandou atualizar (se não mandar atualizar a pagina fica perfeitamente no celular pelo tempor que for preciso para voce ir salvando e quando tiver internet enviar) ja mandou e a pagina ficou total offline não se preucupe oque salvou esta salvo e vai recuperar assim que a conexão voltar para voce enviar, so não se esqueça de enviar para Servidor, baixar o Excel e o Pdf!');
 }
 
 window.addEventListener('load', () => {
@@ -902,6 +902,7 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
 
 
 
