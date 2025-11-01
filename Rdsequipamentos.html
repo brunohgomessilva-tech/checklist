@@ -105,11 +105,13 @@
     </table>
 
     <div class="actions">
-      <button id="btnServidor" class="btn gray">Enviar para o Servidor</button>
-<button id="btnGerarPDF" class="btn">Gerar PDF</button>
-      <button id="btnExcelRDE" class="btn gray">Gerar Excel</button>
-      <button id="btnLimpar" class="btn gray">Limpar</button>
-    </div>
+  <button id="btnSalvarLocal" class="btn gray">Salvar Localmente</button>
+  <button id="btnServidor" class="btn gray">Enviar para o Servidor</button>
+  <button id="btnGerarPDF" class="btn">Gerar PDF</button>
+  <button id="btnExcelRDE" class="btn gray">Gerar Excel</button>
+  <button id="btnLimpar" class="btn gray">Limpar</button>
+</div>
+
   </div>
 </div>
 
@@ -308,6 +310,128 @@ async function enviarParaServidorRDE(){
   }
 }
 document.getElementById('btnServidor').onclick = enviarParaServidorRDE;
+
+// === SUPORTE OFFLINE (Adicionado por ChatGPT) ===
+
+// Salvar dados localmente
+function salvarLocalmente() {
+  const dataIso = $('rde_data').value;
+  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
+  const horaDoc = $('rde_hora_doc').value;
+
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
+    const i = r.querySelectorAll('input,select');
+    return {
+      Data: data,
+      HoraDocumento: horaDoc,
+      TAG: i[0].value,
+      Area: i[1].value,
+      Sim: i[2].checked ? "X" : "",
+      Nao: i[3].checked ? "X" : "",
+      Observacao: i[4].value
+    };
+  }).filter(l => l.TAG || l.Area || l.Sim || l.Nao || l.Observacao);
+
+  localStorage.setItem('rde_offline_cache', JSON.stringify(linhas));
+  alert('💾 Dados salvos localmente! Serão enviados quando houver conexão.');
+}
+
+// Carregar dados salvos ao abrir a página
+window.addEventListener('load', () => {
+  const cache = localStorage.getItem('rde_offline_cache');
+  if (cache) {
+    const linhas = JSON.parse(cache);
+    tblBody.innerHTML = "";
+    linhas.forEach(l => {
+      const tr = document.createElement('tr');
+      const select = criarSelectArea(l.TAG || '');
+      select.value = l.Area || '';
+      tr.innerHTML = `
+        <td><input type="text" value="${l.TAG || ''}" style="text-align:center" /></td>
+        <td></td>
+        <td><input type="checkbox" ${l.Sim ? 'checked' : ''}></td>
+        <td><input type="checkbox" ${l.Nao ? 'checked' : ''}></td>
+        <td><input type="text" value="${l.Observacao || ''}" /></td>`;
+      tblBody.appendChild(tr);
+      tr.children[1].appendChild(select);
+    });
+    alert('📦 Dados locais carregados!');
+  }
+});
+
+// Reescrever o botão "Enviar para Servidor" para suportar offline
+async function enviarParaServidorRDE() {
+  if (!navigator.onLine) {
+    salvarLocalmente();
+    return;
+  }
+
+  const dataIso = $('rde_data').value;
+  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
+  const horaDoc = $('rde_hora_doc').value;
+
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r=>{
+    const i=r.querySelectorAll('input,select');
+    return {
+      Data:data,
+      HoraDocumento:horaDoc,
+      TAG:i[0].value,
+      Area:i[1].value,
+      Sim:i[2].checked?"X":"",
+      Nao:i[3].checked?"X":"",
+      Observacao:i[4].value
+    };
+  }).filter(l => l.TAG || l.Area || l.Sim || l.Nao || l.Observacao);
+
+  try {
+    const GET_URL = 'https://api.jsonbin.io/v3/b/6902556943b1c97be98a8193/latest';
+    const PUT_URL = 'https://api.jsonbin.io/v3/b/6902556943b1c97be98a8193';
+    const MASTER_KEY = '$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi';
+
+    const resGet = await fetch(GET_URL, { headers: { 'X-Master-Key': MASTER_KEY }});
+    let dadosExistentes = [];
+    if(resGet.ok){
+      const json = await resGet.json();
+      dadosExistentes = Array.isArray(json.record) ? json.record : [];
+    }
+
+    const dadosAtualizados = [...dadosExistentes, ...linhas];
+    const resPut = await fetch(PUT_URL, {
+      method:'PUT',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Master-Key':MASTER_KEY,
+        'X-Bin-Versioning':'false'
+      },
+      body:JSON.stringify(dadosAtualizados)
+    });
+
+    if(resPut.ok) {
+      alert('✅ Dados enviados com sucesso!');
+      localStorage.removeItem('rde_offline_cache');
+    } else {
+      alert('❌ Erro ao enviar, dados mantidos localmente.');
+      salvarLocalmente();
+    }
+
+  } catch(err){
+    alert('❌ Erro: ' + err.message + '\nDados salvos localmente.');
+    salvarLocalmente();
+  }
+}
+
+// Associar o novo botão de salvar
+document.getElementById('btnSalvarLocal').onclick = salvarLocalmente;
+
+// Enviar automaticamente quando a internet voltar
+window.addEventListener('online', async () => {
+  const cache = localStorage.getItem('rde_offline_cache');
+  if (cache) {
+    alert('🌐 Conexão restaurada! Enviando dados pendentes...');
+    await enviarParaServidorRDE();
+  }
+});
+
 </script>
 </body>
 </html>
