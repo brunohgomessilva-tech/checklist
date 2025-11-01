@@ -699,8 +699,12 @@ function gerarExcelBase() {
             return null;
         }
 
+        // CORREÇÃO DA DATA - MESMO FORMATO DO PDF
+        const [yyyy, mm, dd] = data.split('-');
+        const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${yyyy}`;
+
         const linhas = linhasFunc.map(f => ({
-            Data: data.split('-').reverse().join('/'),
+            Data: dataFormatada,
             Hora: hora,
             Contratante: contratante,
             Servico: servico,
@@ -758,7 +762,7 @@ function salvarLocalmenteRDS() {
   const pacote = { cabecalho, linhas };
 
   localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
-  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo, adicionou ou mudou alguma coisa salve de novo, mandou atualizar (se não mandar atualizar a pagina fica perfeitamente no celular pelo tempor que for preciso para voce ir salvando e quando tiver internet enviar) ja mandou e a pagina ficou total offline não se preucupe oque salvou esta salvo e vai recuperar assim que a conexão voltar para voce enviar, so não se esqueça de enviar para Servidor, baixar o Excel e o Pdf!');
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo, adicionou ou mudou alguma coisa salve de novo, não mande atualizar a pagina porque ela fica Offline no celular pelo tempo que for preciso, ja mandou e a pagina ficou total offline, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio garanta de enviar para Servidor, baixar o Excel e o Pdf!');
 }
 
 window.addEventListener('load', () => {
@@ -816,7 +820,9 @@ async function enviarParaServidorRDS() {
   }
 
   const dataIso = $('rds_data').value;
-  const data = dataIso ? dataIso.split('-').reverse().join('/') : '';
+  // CORREÇÃO DA DATA - MESMO FORMATO DO PDF
+  const [yyyy, mm, dd] = dataIso.split('-');
+  const data = dataIso ? `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${yyyy}` : '';
   const horaDoc = $('rds_hora_doc').value;
   const contratante = $('rds_contratante').value;
   const servico = $('rds_servico').value;
@@ -891,7 +897,7 @@ document.getElementById('btnServidor').onclick = enviarParaServidorRDS;
 window.addEventListener('online', async () => {
   const cache = localStorage.getItem('rds_offline_cache');
   if (cache) {
-    gerarExcelRDS(true);
+    ultimoExcelBlob = gerarExcelBase();
     alert('🌐 Conexão restaurada! Enviando dados pendentes...');
     await enviarParaServidorRDS();
   }
@@ -902,6 +908,10 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
+
+
+
 
 
 
