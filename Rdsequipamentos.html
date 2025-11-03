@@ -174,11 +174,8 @@
       </thead>
       <tbody id="rde_equip_rows"></tbody>
     </table>
-
-    <!-- Observação Final no PDF -->
-    <div style="margin-top: 15px; padding: 8px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; font-size: 11px; color: #856404;">
-      <strong>OBSERVAÇÃO:</strong> CASO DE RESPOSTA "SIM" PREENCHER FORMULÁRIO "FORMULÁRIO DE REGISTRO DE SINISTRO COM EQUIPAMENTO", EVIDENCIAR COM FOTOS E ENVIAR PARA LUIS.
-    </div>
+    
+    <!-- OBSERVAÇÃO REMOVIDA DO PDF -->
   </div>
 </div>
 
@@ -220,6 +217,20 @@ function criarSelectArea(tagPrefix) {
   return select;
 }
 
+// Função para gerenciar checkboxes mutuamente exclusivos
+function gerenciarCheckboxes(checkboxClicado, linha) {
+  const checkboxes = linha.querySelectorAll('input[type="checkbox"]');
+  
+  if (checkboxClicado.checked) {
+    // Desmarca o outro checkbox
+    checkboxes.forEach(cb => {
+      if (cb !== checkboxClicado) {
+        cb.checked = false;
+      }
+    });
+  }
+}
+
 function addRow(tag="") {
   const tr = document.createElement('tr');
   const tdTag = document.createElement('td');
@@ -240,8 +251,12 @@ function addRow(tag="") {
   const areaSelect = criarSelectArea(tag);
   const inputSim = document.createElement('input');
   inputSim.type = 'checkbox';
+  inputSim.addEventListener('change', () => gerenciarCheckboxes(inputSim, tr));
+  
   const inputNao = document.createElement('input');
   inputNao.type = 'checkbox';
+  inputNao.addEventListener('change', () => gerenciarCheckboxes(inputNao, tr));
+  
   const inputObs = document.createElement('input');
   inputObs.type = 'text';
 
@@ -493,4 +508,5 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
 
