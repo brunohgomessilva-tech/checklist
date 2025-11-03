@@ -28,6 +28,7 @@
     .btn{display:inline-block;background:#0b73d6;color:#fff;border:none;padding:12px 14px;border-radius:8px;font-size:15px;cursor:pointer}
     .btn-gray{background:#6c757d}
     .msg{color:green;margin-top:10px;display:none}
+    .required-field {border: 2px solid #ff4444 !important;}
     @media(max-width:420px){
       .row {flex-direction: column;}
       .col {min-width: 100% !important; max-width: 100% !important;}
@@ -40,14 +41,14 @@
 
   <div class="row">
     <div class="col">
-      <label for="matricula">Funcionário</label>
-      <select id="matricula">
+      <label for="matricula">Funcionário *</label>
+      <select id="matricula" required>
         <option value="">Selecione o funcionário</option>
       </select>
     </div>
     <div class="col">
-      <label for="veiculo">Veículo</label>
-      <select id="veiculo">
+      <label for="veiculo">Veículo *</label>
+      <select id="veiculo" required>
         <option value="">Selecione o veículo</option>
       </select>
     </div>
@@ -199,20 +200,51 @@
     itemsContainer.appendChild(div);
   });
 
+  // Função para validar campos obrigatórios
+  function validarCamposObrigatorios() {
+    let valido = true;
+    
+    // Remover estilos de erro anteriores
+    selectFuncionario.classList.remove('required-field');
+    selectVeiculo.classList.remove('required-field');
+    
+    // Validar funcionário
+    if (!selectFuncionario.value) {
+      selectFuncionario.classList.add('required-field');
+      valido = false;
+    }
+    
+    // Validar veículo
+    if (!selectVeiculo.value) {
+      selectVeiculo.classList.add('required-field');
+      valido = false;
+    }
+    
+    return valido;
+  }
+
   function coletarDados(){
-    return Array.from(document.querySelectorAll('#items .item')).map(it => ({
-      num: it.getAttribute('data-num'),
-      title: it.querySelector('.item-title').textContent.replace(/^\d+\.\s*/,'').trim(),
-      desc: it.querySelector('.param-desc').value.trim(),
-      status: Array.from(it.querySelectorAll('input[type=radio]')).find(r=>r.checked)?.value || '',
-      obs: it.querySelector('.obs_input').value.trim()
-    }));
+    return Array.from(document.querySelectorAll('#items .item'))
+      .map(it => ({
+        num: it.getAttribute('data-num'),
+        title: it.querySelector('.item-title').textContent.replace(/^\d+\.\s*/,'').trim(),
+        desc: it.querySelector('.param-desc').value.trim(),
+        status: Array.from(it.querySelectorAll('input[type=radio]')).find(r=>r.checked)?.value || '',
+        obs: it.querySelector('.obs_input').value.trim()
+      }))
+      // FILTRAR: manter apenas itens com status "medio" ou "fora"
+      .filter(item => item.status === 'medio' || item.status === 'fora');
   }
 
   function limparNomeArquivo(nome){return nome.replace(/[^a-z0-9_-]/gi, '_');}
   function msgOK(){const m = document.getElementById('msgOk'); m.style.display = 'block'; setTimeout(()=>m.style.display='none',6000);}
 
   async function gerarPDFsalvar(){
+    if (!validarCamposObrigatorios()) {
+      alert('❌ Por favor, selecione o funcionário e o veículo antes de gerar o PDF.');
+      return;
+    }
+    
     const dados = {data:dataEl.value, hora:horaEl.value, matricula:selectFuncionario.value.trim(), veiculo:selectVeiculo.value.trim(), hodometro:document.getElementById('hodometro').value.trim(), items:coletarDados()};
     const nomeFuncionarioCompleto = funcionarios.find(f => f.codigo===dados.matricula)?.nome || 'sem_nome';
     const nomeFuncionario = limparNomeArquivo(nomeFuncionarioCompleto);
@@ -230,12 +262,17 @@
     pdf.setFontSize(14);
     pdf.text(`Check-List Diário — Veículos Leves`, margin, yOffset); yOffset += lineHeight + 4;
     pdf.setFontSize(11);
-  pdf.text(`Data: ${dados.data.split('-').reverse().join('/')}   Horário: ${dados.hora || '-'}`, margin, yOffset);
- yOffset += lineHeight;
+    pdf.text(`Data: ${dados.data.split('-').reverse().join('/')}   Horário: ${dados.hora || '-'}`, margin, yOffset);
+    yOffset += lineHeight;
     pdf.text(`Funcionário: ${nomeFuncionarioCompleto || '-'}`, margin, yOffset); yOffset += lineHeight;
     pdf.text(`Veículo: ${dados.veiculo || '-'}`, margin, yOffset); yOffset += lineHeight;
     pdf.text(`Hodômetro: ${dados.hodometro || '-'}`, margin, yOffset); yOffset += lineHeight + 8;
     pdf.line(margin, yOffset, pageWidth-margin, yOffset); yOffset += 12;
+
+    // Adicionar nota sobre itens filtrados
+    pdf.setFontSize(10);
+    pdf.text('Nota: Apenas itens com status "Médio" ou "Fora" são incluídos neste relatório.', margin, yOffset);
+    yOffset += lineHeight + 8;
 
     dados.items.forEach(it=>{
       if(yOffset + 80 > pageHeight){ pdf.addPage(); yOffset = margin; }
@@ -254,6 +291,11 @@
   }
 
   function gerarExcel(){
+    if (!validarCamposObrigatorios()) {
+      alert('❌ Por favor, selecione o funcionário e o veículo antes de gerar o Excel.');
+      return;
+    }
+    
     const dados = coletarDados();
     const matricula = selectFuncionario.value.trim();
     const veiculo = selectVeiculo.value.trim();
@@ -262,7 +304,7 @@
     const nomeArquivo = `checklist_${nomeFuncionario}_${dataArquivo}.xlsx`;
 
     const linhas = dados.map(it => ({
-     Data: dataEl.value.split('-').reverse().join('/'),
+      Data: dataEl.value.split('-').reverse().join('/'),
       Horario: horaEl.value,
       Funcionario: matricula,
       Veiculo: veiculo,
@@ -282,33 +324,22 @@
   }
 
   function salvarLocalmente(){
+    if (!validarCamposObrigatorios()) {
+      alert('❌ Por favor, selecione o funcionário e o veículo antes de salvar localmente.');
+      return;
+    }
+    
     const dadosLocal = {data:dataEl.value,hora:horaEl.value,matricula:selectFuncionario.value,veiculo:selectVeiculo.value,hodometro:document.getElementById('hodometro').value.trim(),items:coletarDados()};
     localStorage.setItem('checklist_veiculos', JSON.stringify(dadosLocal));
     alert('✅ Checklist salvo localmente!');
   }
 
-  const dadosSalvos = localStorage.getItem('checklist_veiculos');
-  if(dadosSalvos){
-    try{
-      const obj = JSON.parse(dadosSalvos);
-      selectFuncionario.value = obj.matricula || '';
-      selectVeiculo.value = obj.veiculo || '';
-      document.getElementById('hodometro').value = obj.hodometro || '';
-      if(obj.items && Array.isArray(obj.items)){
-        obj.items.forEach(it=>{
-          const el = document.querySelector(`.item[data-num="${it.num}"]`);
-          if(el){
-            el.querySelector('.param-desc').value = it.desc || '';
-            const radio = Array.from(el.querySelectorAll('input[type=radio]')).find(r=>r.value===it.status);
-            if(radio) radio.checked = true;
-            el.querySelector('.obs_input').value = it.obs || '';
-          }
-        });
-      }
-    } catch(e){}
-  }
-
   async function enviarParaServidor(){
+    if (!validarCamposObrigatorios()) {
+      alert('❌ Por favor, selecione o funcionário e o veículo antes de enviar para o servidor.');
+      return;
+    }
+    
     const dadosNovo = coletarDados().map(it => ({
       Data: dataEl.value.split('-').reverse().join('/'),
       Horario: horaEl.value,
@@ -358,6 +389,27 @@
     }
   }
 
+  const dadosSalvos = localStorage.getItem('checklist_veiculos');
+  if(dadosSalvos){
+    try{
+      const obj = JSON.parse(dadosSalvos);
+      selectFuncionario.value = obj.matricula || '';
+      selectVeiculo.value = obj.veiculo || '';
+      document.getElementById('hodometro').value = obj.hodometro || '';
+      if(obj.items && Array.isArray(obj.items)){
+        obj.items.forEach(it=>{
+          const el = document.querySelector(`.item[data-num="${it.num}"]`);
+          if(el){
+            el.querySelector('.param-desc').value = it.desc || '';
+            const radio = Array.from(el.querySelectorAll('input[type=radio]')).find(r=>r.value===it.status);
+            if(radio) radio.checked = true;
+            el.querySelector('.obs_input').value = it.obs || '';
+          }
+        });
+      }
+    } catch(e){}
+  }
+
   window.addEventListener('online', ()=>{
     const dadosSalvos = localStorage.getItem('checklist_veiculos');
     if(dadosSalvos){
@@ -374,7 +426,6 @@
 </script>
 </body>
 </html>
-
 
 
 
