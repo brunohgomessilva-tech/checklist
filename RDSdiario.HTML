@@ -264,8 +264,8 @@
     <h1>Gerador de RDS — Relatório Diário de Serviço</h1>
 
     <div class="row">
-<div class="col small"><label>Data</label><input id="rds_data" type="date" readonly></div>
-      <div class="col small"><label>Hora do Documento</label><input id="rds_hora_doc" type="text" readonly></div>
+<div class="col small"><label>Data</label><input id="rds_data" type="date"></div>
+      <div class="col small"><label>Hora do Documento</label><input id="rds_hora_doc" type="text"></div>
       <div class="col">
         <label>Contratante</label>
         <select id="rds_contratante">
@@ -304,7 +304,6 @@
 
     <div style="margin-top:8px" class="row">
       <div class="col"><label>Diálogo Diário de Segurança (DDS) — Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
-      <div class="col small"><label>Horário do DDS</label><input id="rds_horario_dds" type="text" placeholder="Ex: 07:00"></div>
     </div>
 
     <hr style="margin:12px 0">
@@ -365,8 +364,7 @@
       </tr>
       <tr>
         <td><strong>HORÁRIO DE TRABALHO:</strong><div id="meta_horario_trabalho"></div></td>
-        <td><strong>TEMA (DDS):</strong><div id="meta_tema"></div></td>
-        <td><strong>HORÁRIO DO DDS:</strong><div id="meta_horario_dds"></div></td>
+        <td colspan="2"><strong>TEMA (DDS):</strong><div id="meta_tema"></div></td>
       </tr>
     </table>
 
@@ -554,7 +552,6 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
   $('meta_fabrica').innerText=$('rds_fabrica').value;
   $('meta_horario_trabalho').innerText=$('rds_horario_trabalho').value;
   $('meta_tema').innerText=$('rds_tema').value;
-  $('meta_horario_dds').innerText=$('rds_horario_dds').value;
   $('rds_dds').innerText=$('rds_tema').value;
 
   const tbody=$('rds_func_rows');
@@ -626,7 +623,6 @@ function gerarExcelBase() {
         const fabrica = $('rds_fabrica').value;
         const horarioTrabalho = $('rds_horario_trabalho').value;
         const tema = $('rds_tema').value;
-        const horarioDDS = $('rds_horario_dds').value;
 
         const tbody = $('tblFuncionarios').querySelector('tbody');
 
@@ -660,7 +656,6 @@ function gerarExcelBase() {
             Fabrica: fabrica,
             HorarioTrabalho: horarioTrabalho,
             TemaDDS: tema,
-            HorarioDDS: horarioDDS,
             Codigo: f.Codigo,
             Nome: f.Nome,
             Entrada: f.Entrada,
@@ -693,8 +688,7 @@ function salvarLocalmenteRDS() {
     servico: $('rds_servico').value,
     horarioTrabalho: $('rds_horario_trabalho').value,
     fabrica: $('rds_fabrica').value,
-    tema: $('rds_tema').value,
-    horarioDDS: $('rds_horario_dds').value
+    tema: $('rds_tema').value
   };
 
   const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
@@ -728,7 +722,6 @@ window.addEventListener('load', () => {
       $('rds_horario_trabalho').value = cabecalho.horarioTrabalho || '';
       $('rds_fabrica').value = cabecalho.fabrica || '';
       $('rds_tema').value = cabecalho.tema || '';
-      $('rds_horario_dds').value = cabecalho.horarioDDS || '';
     }
 
     // restaura tabela
@@ -778,7 +771,6 @@ async function enviarParaServidorRDS() {
   const horarioTrabalho = $('rds_horario_trabalho').value;
   const fabrica = $('rds_fabrica').value;
   const tema = $('rds_tema').value;
-  const horarioDDS = $('rds_horario_dds').value;
 
   const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
     const i = r.querySelectorAll('input,select');
@@ -790,7 +782,6 @@ async function enviarParaServidorRDS() {
       HorarioTrabalho: horarioTrabalho,
       Fabrica: fabrica,
       TemaDDS: tema,
-      HorarioDDS: horarioDDS,
       Codigo: i[0].value,
       Nome: i[1].value,
       Entrada: i[2].value,
@@ -857,29 +848,6 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
