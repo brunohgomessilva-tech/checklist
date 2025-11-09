@@ -815,7 +815,7 @@ function salvarLocalmenteRDS() {
   const pacote = { cabecalho, linhas };
 
   localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
-  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio enive para Servidor!');
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso sem internet, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio envie para Servidor!');
 }
 
 window.addEventListener('load', () => {
@@ -960,4 +960,5 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
+
 
