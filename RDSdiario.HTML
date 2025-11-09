@@ -254,9 +254,41 @@
       justify-content: space-between;
     }
   }
+
+  /* Novos estilos para o campo de horário de trabalho */
+  .horario-trabalho-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .horario-input-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .horario-input-group label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .horario-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    height: fit-content;
+  }
+
+  .horario-btn:hover {
+    background: #218838;
+  }
 </style>
-
-
 </head>
 <body>
 <div class="container">
@@ -264,7 +296,7 @@
     <h1>Gerador de RDS — Relatório Diário de Serviço</h1>
 
     <div class="row">
-<div class="col small"><label>Data</label><input id="rds_data" type="date"></div>
+      <div class="col small"><label>Data</label><input id="rds_data" type="date"></div>
       <div class="col small"><label>Hora do Documento</label><input id="rds_hora_doc" type="text"></div>
       <div class="col">
         <label>Contratante</label>
@@ -297,13 +329,28 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col"><label>Horário de Trabalho</label><input id="rds_horario_trabalho" type="text" placeholder="Ex: 07:00 às 16:48 - SEG A SEX"></div>
-      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
-    </div>
-
+    <!-- MODIFICAÇÃO 1: Inverter posição - DDS primeiro -->
     <div style="margin-top:8px" class="row">
       <div class="col"><label>Diálogo Diário de Segurança (DDS) — Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
+    </div>
+
+    <!-- MODIFICAÇÃO 2: Horário de Trabalho com dois campos + botão -->
+    <div class="row">
+      <div class="col">
+        <label>Horário de Trabalho</label>
+        <div class="horario-trabalho-container">
+          <div class="horario-input-group">
+            <label>Entrada</label>
+            <input id="rds_horario_entrada" type="text" placeholder="Ex: 07:00">
+          </div>
+          <div class="horario-input-group">
+            <label>Saída</label>
+            <input id="rds_horario_saida" type="text" placeholder="Ex: 17:30">
+          </div>
+          <button id="btnPreencherHorario" class="horario-btn">Preencher Próximo</button>
+        </div>
+      </div>
+      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
     </div>
 
     <hr style="margin:12px 0">
@@ -328,10 +375,10 @@
     </table>
 
     <div class="actions"> 
-<button id="btnSalvarLocal" class="btn">Salvar Localmente</button>
-<button id="btnServidor" class="btn">Enviar para o Servidor</button>  
-<button id="btnExcelRDS" class="btn gray">Gerar Excel</button> 
-  <button id="btnGerarPDF" class="btn gray">Gerar PDF</button>
+      <button id="btnSalvarLocal" class="btn">Salvar Localmente</button>
+      <button id="btnServidor" class="btn">Enviar para o Servidor</button>  
+      <button id="btnExcelRDS" class="btn gray">Gerar Excel</button> 
+      <button id="btnGerarPDF" class="btn gray">Gerar PDF</button>
       <button id="btnLimpar" class="btn gray">Limpar</button>
 
       <div class="muted">Arquivo: <strong>RDS_SERVICO_DD-MM-AAAA_HH-MM.pdf</strong></div>
@@ -386,18 +433,18 @@
       <div id="rds_dds" style="margin-top:6px;min-height:36px"></div>
     </div>
 
-<div class="rds-foot">
-  <div class="sig">
-    <div class="line"></div>
-    <div style="font-size:12px; text-align:center;">ASSINATURA ENCARREGADO DA CONTRATADA</div>
-  </div>
-  <div class="sig">
-    <div class="line"></div>
-    <div style="font-size:12px; text-align:center;">ASSINATURA GESTOR DO CONTRATO</div>
+    <div class="rds-foot">
+      <div class="sig">
+        <div class="line"></div>
+        <div style="font-size:12px; text-align:center;">ASSINATURA ENCARREGADO DA CONTRATADA</div>
+      </div>
+      <div class="sig">
+        <div class="line"></div>
+        <div style="font-size:12px; text-align:center;">ASSINATURA GESTOR DO CONTRATO</div>
+      </div>
+    </div>
   </div>
 </div>
-
-
 
 <script>
 // --- DATA E HORA AUTOMÁTICA ---
@@ -482,9 +529,6 @@ window.addEventListener('DOMContentLoaded', () => {
   {codigo:"02000", nome:"WILLIAN DOS SANTOS EVANGELINO"}
 ];
 
-
-
-
 // --- FUNÇÕES ---
 const $ = id => document.getElementById(id);
 const tblBody = document.querySelector('#tblFuncionarios tbody');
@@ -538,7 +582,65 @@ for(let i=0;i<20;i++) addRow({});
 $('btnAdd').onclick=()=>addRow({});
 $('btnLimpar').onclick=()=>{tblBody.innerHTML='';for(let i=0;i<20;i++) addRow({});};
 
-// gerar PDF
+// --- VARIÁVEL PARA CONTROLAR A PRÓXIMA LINHA A SER PREENCHIDA ---
+let proximaLinhaParaPreencher = 0;
+
+// --- MODIFICAÇÃO 3: FUNÇÃO PARA PREENCHER HORÁRIO AUTOMATICAMENTE (CORRIGIDA) ---
+$('btnPreencherHorario').onclick = () => {
+  const entrada = $('rds_horario_entrada').value.trim();
+  const saida = $('rds_horario_saida').value.trim();
+  
+  if (!entrada || !saida) {
+    alert('Por favor, preencha os horários de entrada e saída.');
+    return;
+  }
+  
+  // Encontra todas as linhas da tabela
+  const linhas = tblBody.querySelectorAll('tr');
+  
+  if (linhas.length === 0) {
+    alert('Não há linhas na tabela para preencher.');
+    return;
+  }
+  
+  // Verifica se já preencheu todas as linhas
+  if (proximaLinhaParaPreencher >= linhas.length) {
+    alert('Todas as linhas já foram preenchidas!');
+    return;
+  }
+  
+  // Preenche apenas a próxima linha disponível
+  const linhaAtual = linhas[proximaLinhaParaPreencher];
+  const cells = linhaAtual.querySelectorAll('td');
+  
+  // CORREÇÃO: Usar os índices corretos da estrutura original
+  // cells[2] = Entrada, cells[3] = Saída (conforme a estrutura do seu código base)
+  if (cells.length >= 5) {
+    const inputEntrada = cells[2].querySelector('input');
+    const inputSaida = cells[3].querySelector('input');
+    
+    if (inputEntrada && inputSaida) {
+      inputEntrada.value = entrada; // Campo de entrada
+      inputSaida.value = saida;     // Campo de saída
+      
+      // Incrementa para a próxima linha
+      proximaLinhaParaPreencher++;
+    }
+  }
+};
+
+// --- MODIFICAÇÃO 4: FUNÇÃO PARA OBTER HORÁRIO DE TRABALHO COMO TEXTO ---
+function obterHorarioTrabalhoTexto() {
+  const entrada = $('rds_horario_entrada').value.trim();
+  const saida = $('rds_horario_saida').value.trim();
+  
+  if (entrada && saida) {
+    return `${entrada} às ${saida}`;
+  }
+  return '';
+}
+
+// gerar PDF (MANTIDO COM PEQUENA MODIFICAÇÃO)
 $('btnGerarPDF').onclick=async()=>{
   const {jsPDF}=window.jspdf;
   const dataISO = $('rds_data').value; // yyyy-mm-dd
@@ -550,7 +652,10 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
   $('meta_contratante').innerText=$('rds_contratante').value;
   $('meta_servico').innerText=$('rds_servico').value;
   $('meta_fabrica').innerText=$('rds_fabrica').value;
-  $('meta_horario_trabalho').innerText=$('rds_horario_trabalho').value;
+  
+  // MODIFICAÇÃO: Usar a função para obter horário formatado
+  $('meta_horario_trabalho').innerText = obterHorarioTrabalhoTexto();
+  
   $('meta_tema').innerText=$('rds_tema').value;
   $('rds_dds').innerText=$('rds_tema').value;
 
@@ -621,7 +726,10 @@ function gerarExcelBase() {
         const contratante = $('rds_contratante').value;
         const servico = $('rds_servico').value;
         const fabrica = $('rds_fabrica').value;
-        const horarioTrabalho = $('rds_horario_trabalho').value;
+        
+        // MODIFICAÇÃO: Usar função para obter horário formatado
+        const horarioTrabalho = obterHorarioTrabalhoTexto();
+        
         const tema = $('rds_tema').value;
 
         const tbody = $('tblFuncionarios').querySelector('tbody');
@@ -678,7 +786,7 @@ function gerarExcelBase() {
 }
 
 // ======================================================
-// Salvamento Local + Restauração (RDS)
+// Salvamento Local + Restauração (RDS) - MODIFICADO
 // ======================================================
 function salvarLocalmenteRDS() {
   const cabecalho = {
@@ -686,7 +794,9 @@ function salvarLocalmenteRDS() {
     horaDoc: $('rds_hora_doc').value,
     contratante: $('rds_contratante').value,
     servico: $('rds_servico').value,
-    horarioTrabalho: $('rds_horario_trabalho').value,
+    // MODIFICAÇÃO: Salvar horários separados
+    horarioEntrada: $('rds_horario_entrada').value,
+    horarioSaida: $('rds_horario_saida').value,
     fabrica: $('rds_fabrica').value,
     tema: $('rds_tema').value
   };
@@ -705,7 +815,7 @@ function salvarLocalmenteRDS() {
   const pacote = { cabecalho, linhas };
 
   localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
-  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo, adicionou ou mudou alguma coisa salve de novo, não mande atualizar a pagina porque ela fica Offline no celular pelo tempo que for preciso, ja mandou e a pagina ficou total offline, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio garanta de enviar para Servidor, baixar o Excel e o Pdf!');
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio enive para Servidor!');
 }
 
 window.addEventListener('load', () => {
@@ -719,7 +829,9 @@ window.addEventListener('load', () => {
       $('rds_hora_doc').value = cabecalho.horaDoc || '';
       $('rds_contratante').value = cabecalho.contratante || '';
       $('rds_servico').value = cabecalho.servico || '';
-      $('rds_horario_trabalho').value = cabecalho.horarioTrabalho || '';
+      // MODIFICAÇÃO: Restaurar horários separados
+      $('rds_horario_entrada').value = cabecalho.horarioEntrada || '';
+      $('rds_horario_saida').value = cabecalho.horarioSaida || '';
       $('rds_fabrica').value = cabecalho.fabrica || '';
       $('rds_tema').value = cabecalho.tema || '';
     }
@@ -748,7 +860,7 @@ window.addEventListener('load', () => {
 });
 
 // ======================================================
-// Enviar dados para o servidor (com fallback offline)
+// Enviar dados para o servidor (com fallback offline) - MODIFICADO
 // ======================================================
 async function enviarParaServidorRDS() {
   // 🔹 Garante que sempre gere Excel antes de enviar
@@ -768,7 +880,10 @@ async function enviarParaServidorRDS() {
   const horaDoc = $('rds_hora_doc').value;
   const contratante = $('rds_contratante').value;
   const servico = $('rds_servico').value;
-  const horarioTrabalho = $('rds_horario_trabalho').value;
+  
+  // MODIFICAÇÃO: Usar função para obter horário formatado
+  const horarioTrabalho = obterHorarioTrabalhoTexto();
+  
   const fabrica = $('rds_fabrica').value;
   const tema = $('rds_tema').value;
 
@@ -842,13 +957,7 @@ window.addEventListener('online', async () => {
     await enviarParaServidorRDS();
   }
 });
-
-
-
 </script>
 </body>
 </html>
-
-
-
 
