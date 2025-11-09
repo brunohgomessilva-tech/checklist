@@ -334,8 +334,9 @@
       <div class="col"><label>Diálogo Diário de Segurança (DDS) — Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
     </div>
 
-    <!-- MODIFICAÇÃO 2: Horário de Trabalho com dois campos + botão -->
+    <!-- MODIFICAÇÃO SOLICITADA: Fábrica/Local antes do Horário de Trabalho -->
     <div class="row">
+      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
       <div class="col">
         <label>Horário de Trabalho</label>
         <div class="horario-trabalho-container">
@@ -350,7 +351,6 @@
           <button id="btnPreencherHorario" class="horario-btn">Preencher Próximo</button>
         </div>
       </div>
-      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
     </div>
 
     <hr style="margin:12px 0">
@@ -734,7 +734,7 @@ function gerarExcelBase() {
 
         const tbody = $('tblFuncionarios').querySelector('tbody');
 
-        const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
+        const linhasFunc = Array.from(tblBody.querySelectorAll('tr')).map(tr => {
             const cells = tr.querySelectorAll('td');
             const entrada = cells[2].querySelector('input').value.trim();
             const saida = cells[3].querySelector('input').value.trim();
@@ -815,7 +815,7 @@ function salvarLocalmenteRDS() {
   const pacote = { cabecalho, linhas };
 
   localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
-  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso sem internet, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio envie para Servidor!');
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio enive para Servidor!');
 }
 
 window.addEventListener('load', () => {
@@ -960,5 +960,3 @@ window.addEventListener('online', async () => {
 </script>
 </body>
 </html>
-
-
