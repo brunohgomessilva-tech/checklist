@@ -254,9 +254,41 @@
       justify-content: space-between;
     }
   }
+
+  /* Novos estilos para o campo de horário de trabalho */
+  .horario-trabalho-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .horario-input-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .horario-input-group label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .horario-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    height: fit-content;
+  }
+
+  .horario-btn:hover {
+    background: #218838;
+  }
 </style>
-
-
 </head>
 <body>
 <div class="container">
@@ -265,7 +297,7 @@
 
     <div class="row">
       <div class="col small"><label>Data</label><input id="rds_data" type="date"></div>
-      <div class="col small"><label>Hora do Documento</label><input id="rds_hora_doc" type="text" readonly></div>
+      <div class="col small"><label>Hora do Documento</label><input id="rds_hora_doc" type="text"></div>
       <div class="col">
         <label>Contratante</label>
         <select id="rds_contratante">
@@ -289,34 +321,36 @@
           <option>ALMOXARIFE I</option>
           <option>ALMOXARIFE II</option>
           <option>OPERADOR DE LOGISTICA</option>
-          <option>OP. MAQUINAS PESADAS (BRITAGEM) - MOTORISTAS</option>
-          <option>OP. MAQUINAS SIMPLES (MINA) - MOTORISTAS</option>
-          <option>OP. MAQUINAS II (PA CARREGADEIRA)</option>
-          <option>OP. DE CAMINHÃO PRODUÇÃO</option>
-          <option>MECÂNICO (MANUTENÇÃO DE EQUIPAMENTO)</option>
-          <option>COLETA E TRANSPORTES DE RESIDUOS I</option>
-          <option>COLETA E TRANSPORTES DE RESIDUOS II</option>
-          <option>LIMP. INDUSTRIAL DRS</option>
-          <option>TECNICO LABORATORIO</option>
-          <option>LIMPEZA INDUSTRIAL - SPOT</option>
+                   <option>MECÂNICO (MANUTENÇÃO DE EQUIPAMENTO)</option>
+                   <option>LIMP. INDUSTRIAL DRS</option>
+               <option>LIMPEZA INDUSTRIAL - SPOT</option>
           <option>LIMPEZA INDUSTRIAL - ALMOXARIFADO</option>
-          <option>SERV. ABAST. DE COMBUSTIVEIS SÓLIDOS (coque e moinha)</option>
-          <option>SERV. CARREGAMENTO DE FINOS DE CALCARIO (Britagem)</option>
-          <option>SERV. DIVERSOS PARA ÁREA DE QUALIDADE (CAL)</option>
-          <option>SERV. ABAST. DE COMBUSTIVEIS SÓLIDOS (Biomassa)</option>
-          <option>SERV. CARREGAMENTO DE FINOS DE CALCARIO SAFRA</option>
-        </select>
+                  </select>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col"><label>Horário de Trabalho</label><input id="rds_horario_trabalho" type="text" placeholder="Ex: 07:00 às 16:48 - SEG A SEX"></div>
-      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
-    </div>
-
+    <!-- MODIFICAÇÃO 1: Inverter posição - DDS primeiro -->
     <div style="margin-top:8px" class="row">
       <div class="col"><label>Diálogo Diário de Segurança (DDS) — Tema</label><input id="rds_tema" type="text" placeholder="Tema do DDS"></div>
-      <div class="col small"><label>Horário do DDS</label><input id="rds_horario_dds" type="text" placeholder="Ex: 07:00"></div>
+    </div>
+
+    <!-- MODIFICAÇÃO 2: Horário de Trabalho com dois campos + botão -->
+    <div class="row">
+      <div class="col">
+        <label>Horário de Trabalho</label>
+        <div class="horario-trabalho-container">
+          <div class="horario-input-group">
+            <label>Entrada</label>
+            <input id="rds_horario_entrada" type="text" placeholder="Ex: 07:00">
+          </div>
+          <div class="horario-input-group">
+            <label>Saída</label>
+            <input id="rds_horario_saida" type="text" placeholder="Ex: 17:30">
+          </div>
+          <button id="btnPreencherHorario" class="horario-btn">Preencher Próximo</button>
+        </div>
+      </div>
+      <div class="col"><label>Fábrica / Local</label><input id="rds_fabrica" type="text" placeholder="Local de trabalho"></div>
     </div>
 
     <hr style="margin:12px 0">
@@ -340,10 +374,13 @@
       <tbody></tbody>
     </table>
 
-    <div class="actions">
-      <button id="btnGerarPDF" class="btn">Gerar PDF</button>
+    <div class="actions"> 
+      <button id="btnSalvarLocal" class="btn">Salvar Localmente</button>
+      <button id="btnServidor" class="btn">Enviar para o Servidor</button>  
+      <button id="btnExcelRDS" class="btn gray">Gerar Excel</button> 
+      <button id="btnGerarPDF" class="btn gray">Gerar PDF</button>
       <button id="btnLimpar" class="btn gray">Limpar</button>
-<button id="btnExcelRDS" class="btn gray">Gerar Excel</button>
+
       <div class="muted">Arquivo: <strong>RDS_SERVICO_DD-MM-AAAA_HH-MM.pdf</strong></div>
     </div>
   </div>
@@ -374,8 +411,7 @@
       </tr>
       <tr>
         <td><strong>HORÁRIO DE TRABALHO:</strong><div id="meta_horario_trabalho"></div></td>
-        <td><strong>TEMA (DDS):</strong><div id="meta_tema"></div></td>
-        <td><strong>HORÁRIO DO DDS:</strong><div id="meta_horario_dds"></div></td>
+        <td colspan="2"><strong>TEMA (DDS):</strong><div id="meta_tema"></div></td>
       </tr>
     </table>
 
@@ -399,12 +435,12 @@
 
     <div class="rds-foot">
       <div class="sig">
-        <div style="font-size:12px">ASSINATURA ENCARREGADO DA CONTRATADA</div>
         <div class="line"></div>
+        <div style="font-size:12px; text-align:center;">ASSINATURA ENCARREGADO DA CONTRATADA</div>
       </div>
       <div class="sig">
-        <div style="font-size:12px">ASSINATURA GESTOR DO CONTRATO</div>
         <div class="line"></div>
+        <div style="font-size:12px; text-align:center;">ASSINATURA GESTOR DO CONTRATO</div>
       </div>
     </div>
   </div>
@@ -427,154 +463,71 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // --- FUNCIONÁRIOS ---
   const funcionarios = [
-  {codigo:"00225", nome:"WANTUIR BERTOLDO DA SILVA"},
-  {codigo:"01350", nome:"MARIA DA CONCEICAO ARANTES"},
-  {codigo:"01395", nome:"SANDRA APARECIDA VIEIRA SOUZA"},
-  {codigo:"01450", nome:"SERGIO HENRIQUE SIMOES"},
-  {codigo:"01462", nome:"ROSILENE ELIAS DE SOUZA"},
-  {codigo:"01519", nome:"DJALMA DE SOUSA PRATES"},
-  {codigo:"01532", nome:"EDINAR MELO DE SOUSA EDUARDO"},
-  {codigo:"01541", nome:"SILVIO AUGUSTO DE ASSIS"},
-  {codigo:"01542", nome:"PEDRO JOSE DA SILVA"},
-  {codigo:"01566", nome:"VALQUIRIA DO NASCIMENTO DA SILVA"},
-  {codigo:"01586", nome:"GENI ALVES XAVIER"},
-  {codigo:"01648", nome:"JULIANA MARIA DE RESENDE ADRIANO"},
-  {codigo:"01719", nome:"MARQUES CARLOS DE CASTRO"},
-  {codigo:"01759", nome:"MARCOS BATISTA PEREIRA"},
-  {codigo:"01767", nome:"VALDECIRO MELQUIADES DE OLIVEIRA"},
-  {codigo:"01776", nome:"RICARDO JUNIO BELIZARIO"},
-  {codigo:"01807", nome:"MICHELINE JOSE COUTINHO DO VALE"},
-  {codigo:"01811", nome:"JOSE ANTONIO DA SILVA"},
-  {codigo:"01818", nome:"ABGAIR DE JESUS DA SILVA"},
-  {codigo:"01844", nome:"JANE OLIVEIRA GUSMÃO"},
-  {codigo:"01849", nome:"JORDANIA APARECIDA LOPES"},
-  {codigo:"01853", nome:"SERGIO MAXIMIANO DA SILVA"},
-  {codigo:"01854", nome:"JOSE SOARES JUNIOR"},
-  {codigo:"01857", nome:"DANIELE CAMPOS DE ASSUNÇÃO"},
-  {codigo:"01886", nome:"NAIBIA MARIA SOUZA LIMA"},
-  {codigo:"01900", nome:"EDER DE ARAUJO SILVA"},
-  {codigo:"01906", nome:"JADER LUIS DA SILVA"},
-  {codigo:"01908", nome:"JESSICA SILVA RIBEIRO"},
-  {codigo:"01909", nome:"MARCELO AUGUSTO DE OLIVEIRA"},
-  {codigo:"01911", nome:"MARCELO APARECIDO LACERDA"},
-  {codigo:"01912", nome:"DIEGO JOSE RODRIGUES"},
-  {codigo:"01915", nome:"DIOGO DUQUE MARCELINO"},
-  {codigo:"01919", nome:"ISABELLA GONZAGA RIBEIRO"},
-  {codigo:"01924", nome:"APARECIDA MANOEL DA COSTA RODRIGUES"},
-  {codigo:"01925", nome:"RICARDO JUNIOR RIBEIRO MOURA"},
-  {codigo:"01927", nome:"RONIELE CORREA MARTINS"},
-  {codigo:"01928", nome:"LENILDO DOS SANTOS CHAVES"},
-  {codigo:"01935", nome:"RILDO CANDIDO"},
-  {codigo:"01937", nome:"EDVALDO VIEIRA DA SILVA"},
-  {codigo:"01944", nome:"ADEONES PAULO DA SILVA"},
-  {codigo:"01945", nome:"FERNANDA TEIXEIRA COUTO"},
-  {codigo:"01946", nome:"PERPÉTUA APARECIDA MARÇAL"},
-  {codigo:"01955", nome:"DANIEL JUNIO MARÇAL"},
-  {codigo:"01957", nome:"ROGERIO EDUARDO OLIVEIRA"},
-  {codigo:"01962", nome:"SIRLEIA REGINA DE FARIA SILVA"},
-  {codigo:"01965", nome:"HENRIQUE MAGNO SANTOS ALMEIDA"},
-  {codigo:"01967", nome:"IGOR APARECIDO GONZAGA"},
-  {codigo:"01969", nome:"JULIANO UMBERTO DE SALES SILVA"},
-  {codigo:"01970", nome:"JEANCARLOS JUNIOR DA SILVA"},
-  {codigo:"01971", nome:"MONICA GONÇALVES COSTA"},
-  {codigo:"01973", nome:"DAIANE LIMA NOGUEIRA"},
-  {codigo:"01977", nome:"ISILEI DE FATIMA SILVA"},
-  {codigo:"01979", nome:"CARLOS ALBERTO MARRERO MEDINA"},
-  {codigo:"01981", nome:"GABRIEL DE PAULA MORAIS"},
-  {codigo:"01982", nome:"CLEONE NASCIMENTO RODRIGUES"},
-  {codigo:"01983", nome:"SANDRA APARECIDA BORGES"},
-  {codigo:"01984", nome:"RENAN PAULINO ALVES GUIMARAES"},
-  {codigo:"01987", nome:"VAGNER DOMINGOS DE MORAES"},
-  {codigo:"01988", nome:"REINALDO FRANCISCO LOPES"},
-  {codigo:"01989", nome:"MARIANA APARECIDA NUNES DE MELO"},
-  {codigo:"01990", nome:"LUIS ANTONIO LOPES VELOSO"},
-  {codigo:"01991", nome:"NATALIA MARCIANA DE OLIVEIRA SOUZA"},
-  {codigo:"01992", nome:"DOUGLAS TEIXEIRA DOS SANTOS"},
-  {codigo:"01993", nome:"BRUNO HENRIQUE MORAIS FERREIRA"},
-  {codigo:"01994", nome:"MIRELLE DA SILVA RIBEIRO"},
-  {codigo:"01996", nome:"HEITOR EUSTAQUIO ALVES"},
-  {codigo:"01997", nome:"DAISIO APARECIDO OLIVEIRA"},
-  {codigo:"01998", nome:"RHAONNI MEGARON QUEROBINO"},
-  {codigo:"01999", nome:"GEOVANE DO AMARAL GOMES"},
-  {codigo:"02000", nome:"WILLIAN DOS SANTOS EVANGELINO"},
-  {codigo:"02001", nome:"FABIANO GERALDO MARTINS"},
-  {codigo:"02002", nome:"EDER LUIS DUQUE"},
-  {codigo:"02003", nome:"JOÃO VICTOR SANTOS"},
-  {codigo:"02004", nome:"RODRIGO SOUZA AIRES"},
-  {codigo:"02005", nome:"CRISTINA LOPES GOMES"},
-  {codigo:"02006", nome:"JOSE MARIA DA COSTA"},
-  {codigo:"02007", nome:"RAMON AUGUSTO DA SILVA COSTA"},
-  {codigo:"02008", nome:"GABRIEL WHAGNOM NOGUEIRA LIMA"},
-  {codigo:"02009", nome:"VANDER DE PAULA CANDIDO"},
-  {codigo:"02010", nome:"MARDEN ALVES BATISTA"},
-  {codigo:"02011", nome:"ANDER APARECIDO DA SILVA"},
-  {codigo:"02012", nome:"EDEILSON ALVE PEREIRA"},
-  {codigo:"02013", nome:"ISAC LIRIO LUIZ"},
-  {codigo:"02014", nome:"PAULO HENRIQUE RODRIGUES DA SILVA"},
-  {codigo:"02015", nome:"ROGERIO HENRIQUE BRITO DO PRADO"},
+ {codigo:"01944", nome:"ADEONES PAULO DA SILVA"},
   {codigo:"02016", nome:"AGNALDO CRISPIM DA SILVA"},
+  {codigo:"02042", nome:"ALINE MARA CUNHA PAIXAO"},
+  {codigo:"01924", nome:"APARECIDA MANOEL DA COSTA RODRIGUES"},
   {codigo:"02017", nome:"ANNA VITORIA TAVARES DA PAIXAO"},
-  {codigo:"02018", nome:"MAICON SANTOS LIMA"},
+  {codigo:"02038", nome:"ANTONIO CARLOS DOS SANTOS GONÇALVES"},
+  {codigo:"02028", nome:"BRUNO DOS REIS SOUSA"},
+  {codigo:"02037", nome:"CARLA APARECIDA DA SILVA"},
+  {codigo:"02005", nome:"CRISTINA LOPES GOMES"},
+  {codigo:"01973", nome:"DAIANE LIMA NOGUEIRA"},
+  {codigo:"01857", nome:"DANIELE CAMPOS DE ASSUNÇÃO"},
+  {codigo:"01912", nome:"DIEGO JOSE RODRIGUES"},
+  {codigo:"01992", nome:"DOUGLAS TEIXEIRA DOS SANTOS"},
+  {codigo:"02040", nome:"DOUGLAS NERI BORGES"},
+  {codigo:"01900", nome:"EDER DE ARAUJO SILVA"},
+  {codigo:"02012", nome:"EDEILSON ALVE PEREIRA"},
+  {codigo:"01532", nome:"EDINAR MELO DE SOUSA EDUARDO"},
+  {codigo:"01937", nome:"EDVALDO VIEIRA DA SILVA"},
+  {codigo:"02044", nome:"ELAINE APARECIDA DOS SANTOS ARRUDA"},
+  {codigo:"02044", nome:"FERNANDA BENEDITO RIBEIRO"},
+  {codigo:"02008", nome:"GABRIEL WHAGNOM NOGUEIRA LIMA"},
+  {codigo:"01586", nome:"GENI ALVES XAVIER"},
+  {codigo:"02023", nome:"GEYCILAYNE TELES SANTOS"},
+  {codigo:"01999", nome:"GEOVANE DO AMARAL GOMES"},
+  {codigo:"01965", nome:"HENRIQUE MAGNO SANTOS ALMEIDA"},
+  {codigo:"02031", nome:"IRANDI ROSA BRITO"},
+  {codigo:"01844", nome:"JANE OLIVEIRA GUSMÃO"},
+  {codigo:"02025", nome:"JAQUELINE NAZARE ROMAO"},
+  {codigo:"01908", nome:"JESSICA SILVA RIBEIRO"},
+  {codigo:"01811", nome:"JOSE ANTONIO DA SILVA"},
+  {codigo:"02006", nome:"JOSE MARIA DA COSTA"},
+  {codigo:"01849", nome:"JORDANIA APARECIDA LOPES"},
+  {codigo:"01648", nome:"JULIANA MARIA DE RESENDE ADRIANO"},
+  {codigo:"01969", nome:"JULIANO UMBERTO DE SALES SILVA"},
   {codigo:"02019", nome:"JUNIOR WESLEY MESSIAS"},
   {codigo:"02020", nome:"JUSCELINA GONÇALVES DE OLIVEIRA"},
-  {codigo:"02021", nome:"EBERSON DAVID DA SILVA LIMA"},
-  {codigo:"02022", nome:"GABRIELA MARTINS CALIXTO"},
-  {codigo:"02023", nome:"GEYCILAYNE TELES SANTOS"},
-  {codigo:"02024", nome:"JAQUELINE NAZARE ROMAO"},
-  {codigo:"02025", nome:"ANDRE LOPES SILVA"},
-  {codigo:"02026", nome:"WESLIAN XUXA SILVIA MELINDA SOARES DE PONTES"},
-  {codigo:"02027", nome:"FLAVIA ALMEIDA ALVES SAMPAIO"},
-  {codigo:"02028", nome:"BRUNO DOS REIS SOUSA"},
-  {codigo:"02029", nome:"VALDER LEOPOLDINO OLIVEIRA MACHADO"},
-  {codigo:"02030", nome:"AILAN ARNALDO VELOSO"},
-  {codigo:"02031", nome:"IRANDI ROSA BRITO"},
-  {codigo:"02032", nome:"EUGENIO FONSECA DA COSTA DIAS"},
-  {codigo:"02033", nome:"TIAGO ALEXANDRE DA COSTA"},
+  {codigo:"02018", nome:"MAICON SANTOS LIMA"},
+  {codigo:"01909", nome:"MARCELO AUGUSTO DE OLIVEIRA"},
+  {codigo:"02036", nome:"MARCOS ANTONIO GONÇALVES LOPES"},
+  {codigo:"01350", nome:"MARIA DA CONCEICAO ARANTES"},
+  {codigo:"01989", nome:"MARIANA APARECIDA NUNES DE MELO"},
+  {codigo:"01719", nome:"MARQUES CARLOS DE CASTRO"},
+  {codigo:"01807", nome:"MICHELINE JOSE COUTINHO DO VALE"},
+  {codigo:"01994", nome:"MIRELLE DA SILVA RIBEIRO"},
+  {codigo:"01971", nome:"MONICA GONÇALVES COSTA"},
+  {codigo:"01886", nome:"NAIBIA MARIA SOUZA LIMA"},
+  {codigo:"02041", nome:"PABLO HENRIQUE VELOSO"},
   {codigo:"02034", nome:"PAULO HENRIQUE BRITO"},
-  {codigo:"02035", nome:"ANDREA APARECIDA TOME DA SILVA"},
-  {codigo:"80021", nome:"RINALDO CESAR PEREIRA"},
-  {codigo:"80060", nome:"POLIANA OLIVEIRA"},
-  {codigo:"80065", nome:"JOYCE RAFAELA LOPES DA SILVA"},
-  {codigo:"80096", nome:"AILTON RODRIGO COUTINHO"},
-  {codigo:"80101", nome:"TIAGO LEONE RAMOS DA SILVA"},
-  {codigo:"80116", nome:"GUSTAVO TEIXEIRA DA SILVA"},
-  {codigo:"80119", nome:"JOSE WALTER DE OLIVEIRA"},
-  {codigo:"80139", nome:"VANDERLEI BORGES"},
-  {codigo:"80150", nome:"BRUNA DA CUNHA ALVES"},
-  {codigo:"80170", nome:"RODOLFO CARDOSO TEIXEIRA"},
-  {codigo:"80175", nome:"REINALDO DOS SANTOS VALADÃO"},
-  {codigo:"80177", nome:"MAURICIO JOSE DO COUTO"},
-  {codigo:"80184", nome:"LARICE EDUARDA MARTINS"},
-  {codigo:"80188", nome:"JOÃO VITOR ARRUDA"},
-  {codigo:"80208", nome:"ELIAS PEGO"},
-  {codigo:"80215", nome:"JOÃO PEDRO ROCHA DOMINGOS"},
-  {codigo:"80216", nome:"BRENO CALACIO DOS REIS"},
-  {codigo:"80219", nome:"JORDANYA ALVES PEREIRA SANTOS"},
-  {codigo:"80221", nome:"JULIA FERNANDES DA SILVA"},
-  {codigo:"80222", nome:"TIAGO SILVA DE OLIVEIRA"},
-  {codigo:"80224", nome:"JOSE CARLOS RAMOS RODRIGUES"},
-  {codigo:"80225", nome:"RICARDO AUGUSTO DOS SANTOS"},
-  {codigo:"80226", nome:"VIVIANE DE FIGUEIREDO TEIXEIRA"},
-  {codigo:"80227", nome:"BRUNO HENRIK GOMES SILVA"},
-  {codigo:"80228", nome:"HEITOR FERREIRA ARAUJO"},
-  {codigo:"80229", nome:"BEATRIZ ESTELA ELIAS DA SILVA"},
-  {codigo:"80230", nome:"DAIANY MINUCCI GARCIA"},
-  {codigo:"80231", nome:"LUIS ANTONIO LOPES VELOSO"},
-  {codigo:"80232", nome:"ROGERIO EDUARDO OLIVEIRA"},
-  {codigo:"80233", nome:"JEFFERSON RODRIGUES SOARES"},
-  {codigo:"80234", nome:"CELIO GERALDO DE SOUZA"},
-  {codigo:"80235", nome:"ELIAS TIBURCIO DE SOUZA"},
-  {codigo:"80236", nome:"ADRIANO PERCILIO DA SILVA"},
-  {codigo:"80237", nome:"IAN VICTOR MOREIRA GOMES"},
-  {codigo:"80238", nome:"ERICK HENRIQUE DE ALMEIDA"},
-  {codigo:"80239", nome:"CARLOS AUGUSTO DA COSTA"},
-  {codigo:"80240", nome:"GILSON GERALDO MINUCCI GARCIA SILVA"},
-  {codigo:"90001", nome:"GENTIL JOSÉ DE OLIVEIRA"},
-  {codigo:"91002", nome:"LIVIA MENEZES OLIVEIRA"},
-  {codigo:"91003", nome:"NICOMEDES AUGUSTO DE OLEIVEIRA"}
+  {codigo:"01542", nome:"PEDRO JOSE DA SILVA"},
+  {codigo:"01946", nome:"PERPÉTUA APARECIDA MARÇAL"},
+  {codigo:"02007", nome:"RAMON AUGUSTO DA SILVA COSTA"},
+  {codigo:"01988", nome:"REINALDO FRANCISCO LOPES"},
+  {codigo:"01998", nome:"RHAONNI MEGARON QUEROBINO"},
+  {codigo:"02039", nome:"RICARDO DONIZETTI PAIM"},
+  {codigo:"01935", nome:"RILDO CANDIDO"},
+  {codigo:"02004", nome:"RODRIGO SOUZA AIRES"},
+  {codigo:"01462", nome:"ROSILENE ELIAS DE SOUZA"},
+  {codigo:"01395", nome:"SANDRA APARECIDA VIEIRA SOUZA"},
+  {codigo:"01541", nome:"SILVIO AUGUSTO DE ASSIS"},
+  {codigo:"01962", nome:"SIRLEIA REGINA DE FARIA SILVA"},
+  {codigo:"01566", nome:"VALQUIRIA DO NASCIMENTO DA SILVA"},
+  {codigo:"01767", nome:"VALDECIRO MELQUIADES DE OLIVEIRA"},
+  {codigo:"00225", nome:"WANTUIR BERTOLDO DA SILVA"},
+  {codigo:"02000", nome:"WILLIAN DOS SANTOS EVANGELINO"}
 ];
-
-
 
 // --- FUNÇÕES ---
 const $ = id => document.getElementById(id);
@@ -629,7 +582,65 @@ for(let i=0;i<20;i++) addRow({});
 $('btnAdd').onclick=()=>addRow({});
 $('btnLimpar').onclick=()=>{tblBody.innerHTML='';for(let i=0;i<20;i++) addRow({});};
 
-// gerar PDF
+// --- VARIÁVEL PARA CONTROLAR A PRÓXIMA LINHA A SER PREENCHIDA ---
+let proximaLinhaParaPreencher = 0;
+
+// --- MODIFICAÇÃO 3: FUNÇÃO PARA PREENCHER HORÁRIO AUTOMATICAMENTE (CORRIGIDA) ---
+$('btnPreencherHorario').onclick = () => {
+  const entrada = $('rds_horario_entrada').value.trim();
+  const saida = $('rds_horario_saida').value.trim();
+  
+  if (!entrada || !saida) {
+    alert('Por favor, preencha os horários de entrada e saída.');
+    return;
+  }
+  
+  // Encontra todas as linhas da tabela
+  const linhas = tblBody.querySelectorAll('tr');
+  
+  if (linhas.length === 0) {
+    alert('Não há linhas na tabela para preencher.');
+    return;
+  }
+  
+  // Verifica se já preencheu todas as linhas
+  if (proximaLinhaParaPreencher >= linhas.length) {
+    alert('Todas as linhas já foram preenchidas!');
+    return;
+  }
+  
+  // Preenche apenas a próxima linha disponível
+  const linhaAtual = linhas[proximaLinhaParaPreencher];
+  const cells = linhaAtual.querySelectorAll('td');
+  
+  // CORREÇÃO: Usar os índices corretos da estrutura original
+  // cells[2] = Entrada, cells[3] = Saída (conforme a estrutura do seu código base)
+  if (cells.length >= 5) {
+    const inputEntrada = cells[2].querySelector('input');
+    const inputSaida = cells[3].querySelector('input');
+    
+    if (inputEntrada && inputSaida) {
+      inputEntrada.value = entrada; // Campo de entrada
+      inputSaida.value = saida;     // Campo de saída
+      
+      // Incrementa para a próxima linha
+      proximaLinhaParaPreencher++;
+    }
+  }
+};
+
+// --- MODIFICAÇÃO 4: FUNÇÃO PARA OBTER HORÁRIO DE TRABALHO COMO TEXTO ---
+function obterHorarioTrabalhoTexto() {
+  const entrada = $('rds_horario_entrada').value.trim();
+  const saida = $('rds_horario_saida').value.trim();
+  
+  if (entrada && saida) {
+    return `${entrada} às ${saida}`;
+  }
+  return '';
+}
+
+// gerar PDF (MANTIDO COM PEQUENA MODIFICAÇÃO)
 $('btnGerarPDF').onclick=async()=>{
   const {jsPDF}=window.jspdf;
   const dataISO = $('rds_data').value; // yyyy-mm-dd
@@ -641,19 +652,27 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
   $('meta_contratante').innerText=$('rds_contratante').value;
   $('meta_servico').innerText=$('rds_servico').value;
   $('meta_fabrica').innerText=$('rds_fabrica').value;
-  $('meta_horario_trabalho').innerText=$('rds_horario_trabalho').value;
+  
+  // MODIFICAÇÃO: Usar a função para obter horário formatado
+  $('meta_horario_trabalho').innerText = obterHorarioTrabalhoTexto();
+  
   $('meta_tema').innerText=$('rds_tema').value;
-  $('meta_horario_dds').innerText=$('rds_horario_dds').value;
   $('rds_dds').innerText=$('rds_tema').value;
 
   const tbody=$('rds_func_rows');
   tbody.innerHTML='';
   Array.from(tblBody.querySelectorAll('tr')).forEach(r=>{
-    const tds=r.querySelectorAll('input,select');
+  const tds=r.querySelectorAll('input,select');
+  const entrada = tds[2].value.trim();
+  const saida = tds[3].value.trim();
+  const observacao = tds[4].value.trim();
+  if(entrada || saida || observacao){
     const tr2=document.createElement('tr');
-    tr2.innerHTML=`<td>${tds[0].value}</td><td>${tds[1].value}</td><td>${tds[2].value}</td><td>${tds[3].value}</td><td>${tds[4].value}</td>`;
+    tr2.innerHTML=`<td>${tds[0].value}</td><td>${tds[1].value}</td><td>${entrada}</td><td>${saida}</td><td>${observacao}</td>`;
     tbody.appendChild(tr2);
-  });
+  }
+});
+
 
   const wrapper=$('rds_report').cloneNode(true);
   wrapper.style.position='fixed';wrapper.style.left='-9999px';
@@ -669,74 +688,275 @@ const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0'
   while(heightLeft>0){pos-=pdf.internal.pageSize.height;pdf.addPage();pdf.addImage(img,'PNG',0,pos,w,h);heightLeft-=pdf.internal.pageSize.height;}
   pdf.save(`RDS_${$('rds_servico').value}_${dataFormatada}.pdf`);
   document.body.removeChild(wrapper);
-};// 🟢 FUNÇÃO GERAR EXCEL
-$('btnExcelRDS').addEventListener('click', gerarExcelRDS);
+};// 🟢 FUNÇÃO GERAR EXCEL CORRIGIDA
+document.getElementById('btnExcelRDS').addEventListener('click', function() {
+    gerarExcelParaDownload();
+});
 
-function gerarExcelRDS() {
-  const data = $('rds_data').value;
-  const hora = $('rds_hora_doc').value;
-  const contratante = $('rds_contratante').value;
-  const servico = $('rds_servico').value;
-  const fabrica = $('rds_fabrica').value;
-  const horarioTrabalho = $('rds_horario_trabalho').value;
-  const tema = $('rds_tema').value;
-  const horarioDDS = $('rds_horario_dds').value;
+let ultimoExcelBlob = null;
 
-  const tbody = $('tblFuncionarios').querySelector('tbody');
-
-  const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
-    const cells = tr.querySelectorAll('td');
-
-    const entrada = cells[2].querySelector('input').value.trim();
-    const saida = cells[3].querySelector('input').value.trim();
-    const observacao = cells[4].querySelector('input').value.trim();
-
-    // Código e Nome aparecem apenas se Entrada ou Saída preenchido
-    // pegar código do input e nome do select
-const inputCodigo = cells[0].querySelector('input');
-const selectNome = cells[1].querySelector('select');
-
-const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
-const nome = (entrada || saida) ? (selectNome ? selectNome.value.trim() : '') : '';
-
-
-    return {
-      Codigo: codigo,
-      Nome: nome,
-      Entrada: entrada,
-      Saida: saida,
-      Observacao: observacao
-    };
-  }).filter(f => f.Entrada || f.Saida || f.Observacao); // remove linhas totalmente vazias
-
-  const linhas = linhasFunc.map(f => ({
-    Data: data.split('-').reverse().join('/'),
-    Hora: hora,
-    Contratante: contratante,
-    Servico: servico,
-    Fabrica: fabrica,
-    HorarioTrabalho: horarioTrabalho,
-    TemaDDS: tema,
-    HorarioDDS: horarioDDS,
-    Codigo: f.Codigo,  // Coluna I → Código
-    Nome: f.Nome,      // Coluna J → Nome
-    Entrada: f.Entrada,
-    Saida: f.Saida,
-    Observacao: f.Observacao
-  }));
-
-  const nomeArquivo = `RDS_${servico.replace(/[^a-z0-9]/gi,'_')}_${data}_${hora.replace(':','-')}.xlsx`;
-
-  const ws = XLSX.utils.json_to_sheet(linhas);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'RDS');
-  XLSX.writeFile(wb, nomeArquivo);
-
-  alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
+// FUNÇÃO SEPARADA PARA BAIXAR EXCEL
+function gerarExcelParaDownload() {
+    const blob = gerarExcelBase();
+    if (blob) {
+        // Converte o blob de volta para arquivo e faz download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const data = $('rds_data').value;
+        const servico = $('rds_servico').value;
+        const nomeArquivo = `RDS_${servico.replace(/[^a-z0-9]/gi,'_')}_${data}.xlsx`;
+        a.download = nomeArquivo;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('✅ Excel gerado com sucesso! Verifique sua pasta de downloads.');
+    }
 }
 
+// FUNÇÃO BASE QUE GERA O EXCEL (usada por ambos)
+function gerarExcelBase() {
+    try {
+        const data = $('rds_data').value;
+        const hora = $('rds_hora_doc').value;
+        const contratante = $('rds_contratante').value;
+        const servico = $('rds_servico').value;
+        const fabrica = $('rds_fabrica').value;
+        
+        // MODIFICAÇÃO: Usar função para obter horário formatado
+        const horarioTrabalho = obterHorarioTrabalhoTexto();
+        
+        const tema = $('rds_tema').value;
 
+        const tbody = $('tblFuncionarios').querySelector('tbody');
+
+        const linhasFunc = Array.from(tbody.querySelectorAll('tr')).map(tr => {
+            const cells = tr.querySelectorAll('td');
+            const entrada = cells[2].querySelector('input').value.trim();
+            const saida = cells[3].querySelector('input').value.trim();
+            const observacao = cells[4].querySelector('input').value.trim();
+            const inputCodigo = cells[0].querySelector('input');
+            const selectNome = cells[1].querySelector('select');
+            const codigo = (entrada || saida) ? (inputCodigo ? inputCodigo.value.trim() : '') : '';
+            const nome = (entrada || saida) ? (selectNome?.options[selectNome.selectedIndex]?.text?.trim() || '') : '';
+
+            return { Codigo: codigo, Nome: nome, Entrada: entrada, Saida: saida, Observacao: observacao };
+        }).filter(f => f.Entrada || f.Saida || f.Observacao);
+
+        if (linhasFunc.length === 0) {
+            alert('⚠️ Nenhum dado de funcionário preenchido!');
+            return null;
+        }
+
+        // CORREÇÃO DA DATA - MESMO FORMATO DO PDF
+        const [yyyy, mm, dd] = data.split('-');
+        const dataFormatada = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${yyyy}`;
+
+        const linhas = linhasFunc.map(f => ({
+            Data: dataFormatada,
+            Hora: hora,
+            Contratante: contratante,
+            Servico: servico,
+            Fabrica: fabrica,
+            HorarioTrabalho: horarioTrabalho,
+            TemaDDS: tema,
+            Codigo: f.Codigo,
+            Nome: f.Nome,
+            Entrada: f.Entrada,
+            Saida: f.Saida,
+            Observacao: f.Observacao
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(linhas);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'RDS');
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        ultimoExcelBlob = new Blob([wbout], { type: 'application/octet-stream' });
+
+        return ultimoExcelBlob;
+        
+    } catch (error) {
+        alert('❌ Erro ao gerar Excel: ' + error.message);
+        return null;
+    }
+}
+
+// ======================================================
+// Salvamento Local + Restauração (RDS) - MODIFICADO
+// ======================================================
+function salvarLocalmenteRDS() {
+  const cabecalho = {
+    data: $('rds_data').value,
+    horaDoc: $('rds_hora_doc').value,
+    contratante: $('rds_contratante').value,
+    servico: $('rds_servico').value,
+    // MODIFICAÇÃO: Salvar horários separados
+    horarioEntrada: $('rds_horario_entrada').value,
+    horarioSaida: $('rds_horario_saida').value,
+    fabrica: $('rds_fabrica').value,
+    tema: $('rds_tema').value
+  };
+
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
+    const i = r.querySelectorAll('input,select');
+    return {
+      Codigo: i[0].value,
+      Nome: i[1].value,
+      Entrada: i[2].value,
+      Saida: i[3].value,
+      Observacao: i[4].value
+    };
+  }).filter(l => l.Codigo || l.Nome || l.Entrada || l.Saida || l.Observacao);
+
+  const pacote = { cabecalho, linhas };
+
+  localStorage.setItem('rds_offline_cache', JSON.stringify(pacote));
+  alert('💾 Dados salvos localmente! Tudo oque voce salvou até agora vai ficar salvo até ser enviado para o servidor, adicionou ou mudou alguma coisa salve de novo, sem atualizar a pagina funciona no celular pelo tempo que for preciso, atualizou e a pagina sumiu, os dados salvos recuperaram assim que a conexão voltar, pode enviar automatico, por garantia se não houver mensagem de envio enive para Servidor!');
+}
+
+window.addEventListener('load', () => {
+  const cache = localStorage.getItem('rds_offline_cache');
+  if (cache) {
+    const { cabecalho, linhas } = JSON.parse(cache);
+
+    // restaura cabeçalho
+    if (cabecalho) {
+      $('rds_data').value = cabecalho.data || '';
+      $('rds_hora_doc').value = cabecalho.horaDoc || '';
+      $('rds_contratante').value = cabecalho.contratante || '';
+      $('rds_servico').value = cabecalho.servico || '';
+      // MODIFICAÇÃO: Restaurar horários separados
+      $('rds_horario_entrada').value = cabecalho.horarioEntrada || '';
+      $('rds_horario_saida').value = cabecalho.horarioSaida || '';
+      $('rds_fabrica').value = cabecalho.fabrica || '';
+      $('rds_tema').value = cabecalho.tema || '';
+    }
+
+    // restaura tabela
+    if (linhas?.length) {
+      tblBody.innerHTML = "";
+      linhas.forEach(l => {
+        const tr = document.createElement('tr');
+        const select = criarSelectFuncionario(l.Nome || '');
+        tr.innerHTML = `
+          <td><input type="text" value="${l.Codigo || ''}" /></td>
+          <td></td>
+          <td><input type="text" value="${l.Entrada || ''}" /></td>
+          <td><input type="text" value="${l.Saida || ''}" /></td>
+          <td><input type="text" value="${l.Observacao || ''}" /></td>
+          <td><button class="remove-btn">Remover</button></td>
+        `;
+        tr.children[1].appendChild(select);
+        tr.querySelector('.remove-btn').onclick = () => tr.remove();
+        tblBody.appendChild(tr);
+      });
+      alert('📦 Dados locais carregados!');
+    }
+  }
+});
+
+// ======================================================
+// Enviar dados para o servidor (com fallback offline) - MODIFICADO
+// ======================================================
+async function enviarParaServidorRDS() {
+  // 🔹 Garante que sempre gere Excel antes de enviar
+  if (!ultimoExcelBlob) {
+    ultimoExcelBlob = gerarExcelBase(); // ← ASSIM FICA (USA A NOVA FUNÇÃO)
+  }
+
+  if (!ultimoExcelBlob) {
+    alert('❌ Não foi possível gerar o Excel para envio');
+    return;
+  }
+
+  const dataIso = $('rds_data').value;
+  // CORREÇÃO DA DATA - MESMO FORMATO DO PDF
+  const [yyyy, mm, dd] = dataIso.split('-');
+  const data = dataIso ? `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${yyyy}` : '';
+  const horaDoc = $('rds_hora_doc').value;
+  const contratante = $('rds_contratante').value;
+  const servico = $('rds_servico').value;
+  
+  // MODIFICAÇÃO: Usar função para obter horário formatado
+  const horarioTrabalho = obterHorarioTrabalhoTexto();
+  
+  const fabrica = $('rds_fabrica').value;
+  const tema = $('rds_tema').value;
+
+  const linhas = Array.from(tblBody.querySelectorAll('tr')).map(r => {
+    const i = r.querySelectorAll('input,select');
+    return {
+      Data: data,
+      HoraDocumento: horaDoc,
+      Contratante: contratante,
+      Servico: servico,
+      HorarioTrabalho: horarioTrabalho,
+      Fabrica: fabrica,
+      TemaDDS: tema,
+      Codigo: i[0].value,
+      Nome: i[1].value,
+      Entrada: i[2].value,
+      Saida: i[3].value,
+      Observacao: i[4].value
+    };
+  }).filter(l => l.Codigo || l.Nome || l.Entrada || l.Saida || l.Observacao);
+
+  try {
+    const GET_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a/latest';
+    const PUT_URL = 'https://api.jsonbin.io/v3/b/690247b0ae596e708f36195a';
+    const MASTER_KEY = '$2a$10$xR7zwFrjQCoS2LoogAgVfOhRVOufQ4AVodOT8T/m./XkGbS1UICxi';
+
+    const resGet = await fetch(GET_URL, { headers: { 'X-Master-Key': MASTER_KEY } });
+    let dadosExistentes = [];
+    if (resGet.ok) {
+      const json = await resGet.json();
+      dadosExistentes = Array.isArray(json.record) ? json.record : [];
+    }
+
+    const dadosAtualizados = [...dadosExistentes, ...linhas];
+    const resPut = await fetch(PUT_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': MASTER_KEY,
+        'X-Bin-Versioning': 'false'
+      },
+      body: JSON.stringify(dadosAtualizados)
+    });
+
+    if (resPut.ok) {
+      alert('✅ Dados enviados com sucesso!');
+      localStorage.removeItem('rds_offline_cache');
+    } else {
+      alert('❌ Erro ao enviar, dados mantidos localmente.');
+      salvarLocalmenteRDS();
+    }
+
+  } catch (err) {
+    alert('❌ Erro: ' + err.message + '\nDados salvos localmente.');
+    salvarLocalmenteRDS();
+  }
+}
+
+// ======================================================
+// Eventos de botões e reconexão automática
+// ======================================================
+document.getElementById('btnSalvarLocal').onclick = salvarLocalmenteRDS;
+document.getElementById('btnServidor').onclick = enviarParaServidorRDS;
+
+// 🔹 Ao restaurar conexão → gera Excel e envia
+window.addEventListener('online', async () => {
+  const cache = localStorage.getItem('rds_offline_cache');
+  if (cache) {
+    ultimoExcelBlob = gerarExcelBase();
+    alert('🌐 Conexão restaurada! Enviando dados pendentes...');
+    await enviarParaServidorRDS();
+  }
+});
 </script>
 </body>
 </html>
-
